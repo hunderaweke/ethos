@@ -2,10 +2,8 @@ import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import CommunityBanner from "./components/CommunityBanner";
-import NetworkShowcase from "./components/NetworkShowcase";
-import FeaturedBanner from "./components/FeaturedBanner";
 import FeaturesGrid from "./components/FeaturesGrid";
-import InteractiveFeatures from "./components/InteractiveFeatures";
+import AboutSection from "./components/AboutSection";
 import Footer from "./components/Footer";
 import HandlePage from "./components/HandlePage";
 
@@ -28,9 +26,7 @@ function App() {
         <Hero onViewProfile={handleShowProfile} />
         <FeaturesGrid onViewProfile={handleShowProfile} />
         <CommunityBanner />
-        <NetworkShowcase />
-        <FeaturedBanner />
-        <InteractiveFeatures />
+        <AboutSection />
       </main>
       <Footer onViewProfile={handleShowProfile} />
     </div>
