@@ -1,33 +1,33 @@
 import { useState } from "react";
-import { Plus, Minus, HelpCircle } from "lucide-react";
+import { Plus, Minus, Question } from "@phosphor-icons/react";
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const faqs = [
     {
-      q: "What is Ethos?",
-      a: "Ethos is a curation directory that lets you share and discover recommended creators, channels, and accounts you follow across YouTube, TikTok, GitHub, X, Telegram, and other social platforms.",
+      q: "What is Blueprint?",
+      a: "Blueprint is a personal shelf that lets you curate and share the books, essays, channels, and ideas that shaped your mind and discover what built others.",
     },
     {
       q: "How does the handle claim work?",
-      a: "Simply search for an available name in the claim box at the top or bottom of this page. Once claimed, your unique @handle (e.g. ethos.id/@technomad23) becomes your public recommendation profile.",
+      a: "Simply search for an available name in the claim box at the top or bottom of this page. Once claimed, your unique @handle (e.g. blueprint.id/@technomad23) becomes your public mind-shelf profile.",
     },
     {
-      q: "Is Ethos free to use?",
-      a: "Yes! Creating your profile, claiming your handle, curating follows, writing custom reviews, and tagging niches is 100% free and always will be.",
+      q: "Is Blueprint free to use?",
+      a: "Yes! Creating your profile, claiming your handle, curating what shaped you, writing custom reviews, and tagging niches is 100% free and always will be.",
     },
     {
       q: "How is my curation data stored?",
-      a: "Your recommendations are saved under your personal profile config. You own your lists and can download them at any time in standard JSON or CSV formats.",
+      a: "Your influences and lists are saved under your personal profile config. You own your lists and can download them at any time in standard JSON or CSV formats.",
     },
     {
       q: "Can I connect custom domains?",
       a: "Absolutely. You can map your custom domain (e.g. recommend.yourname.com) directly to your curation shelf in the settings dashboard at no cost.",
     },
     {
-      q: "How do I import existing follows?",
-      a: "We support simple integrations to import follow logs from X (Twitter), YouTube subscriptions, or GitHub star history, letting you launch your curation list in seconds.",
+      q: "How do I import what shaped me?",
+      a: "We support simple integrations to import your Goodreads logs, YouTube subscriptions, or GitHub star history, letting you launch your curation shelf in seconds.",
     },
   ];
 
@@ -41,14 +41,14 @@ export default function FAQSection() {
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-100 px-3.5 py-1 text-xs font-semibold tracking-wider text-brand-indigo uppercase mb-4">
-            <HelpCircle className="h-3.5 w-3.5 text-indigo-500" /> FAQ
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 border border-zinc-200 px-3.5 py-1 text-xs font-semibold tracking-wider text-zinc-900 uppercase mb-4">
+            <Question className="h-3.5 w-3.5 text-zinc-600" /> FAQ
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Frequently Asked Questions
           </h2>
           <p className="mt-4 text-sm sm:text-base text-slate-600 font-medium">
-            Everything you need to know about setting up your Ethos curation directory.
+            Everything you need to know about setting up your Blueprint shelf.
           </p>
         </div>
 

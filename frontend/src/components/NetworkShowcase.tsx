@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShieldCheck, Award, Zap, Activity, Check, Wallet, Radio } from "lucide-react";
+import { ShieldCheck, Trophy, Lightning, Pulse, Check, Radio } from "@phosphor-icons/react";
 
 export default function NetworkShowcase() {
   const [feedSubscribed, setFeedSubscribed] = useState(false);
@@ -7,23 +7,21 @@ export default function NetworkShowcase() {
   return (
     <section id="discovery" className="py-20 lg:py-28 bg-white relative overflow-hidden">
       {/* Decorative radial gradients */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-indigo-50/50 blur-3xl -z-10" />
-
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-3.5 py-1 text-xs font-semibold tracking-wider text-emerald-600 uppercase mb-4">
-            <Radio className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 border border-zinc-200 px-3.5 py-1 text-xs font-semibold tracking-wider text-zinc-900 uppercase mb-4">
+            <Radio className="h-3.5 w-3.5 text-black animate-pulse" />
             Community Curated Recommendations
           </div>
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-            A curated directory of follows{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-indigo to-brand-cyan">
+            A directory of human influences{" "}
+            <span className="text-black font-extrabold">
               powered by people.
             </span>
           </h2>
           <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-xl mx-auto">
-            Ethos is a simple directory where users list and explain who they follow. Discover niche channels, follow top builders, and explore authentic recommendations.
+            Blueprint is a personal museum of the mind. Share the creators, articles, and books that shaped your path and learn what built others.
           </p>
         </div>
 
@@ -39,12 +37,12 @@ export default function NetworkShowcase() {
                 <img
                   src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=150"
                   alt="Identity Avatar"
-                  className="h-14 w-14 rounded-full object-cover ring-2 ring-indigo-50"
+                  className="h-14 w-14 rounded-full object-cover ring-2 ring-zinc-100 grayscale hover:grayscale-0 transition-[filter] duration-300"
                 />
                 <div>
                   <div className="flex items-center gap-1.5">
                     <h3 className="font-bold text-slate-900 text-lg">Alex Rivera</h3>
-                    <ShieldCheck className="h-4 w-4 text-indigo-500 fill-indigo-50" />
+                    <ShieldCheck weight="fill" className="h-4 w-4 text-zinc-400" />
                   </div>
                   <p className="text-sm font-semibold text-slate-500">@technomad23</p>
                 </div>
@@ -55,11 +53,11 @@ export default function NetworkShowcase() {
                   onClick={() => setFeedSubscribed(!feedSubscribed)}
                   className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all active:scale-95 shadow-sm border ${
                     feedSubscribed
-                      ? "bg-emerald-50 border-emerald-100 text-emerald-700 hover:bg-emerald-100"
-                      : "bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-700 hover:border-indigo-700"
+                      ? "bg-zinc-100 border-zinc-200 text-zinc-800 hover:bg-zinc-200"
+                      : "bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800 hover:border-zinc-800"
                   }`}
                 >
-                  <Activity className="h-4 w-4" />
+                  <Pulse className="h-4 w-4" />
                   {feedSubscribed ? "Subscribed to Curation Feed" : "Subscribe to Feed"}
                 </button>
               </div>
@@ -68,23 +66,23 @@ export default function NetworkShowcase() {
             {/* Bottom Row: Score & Widget details */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              {/* Left col: Ethos Score */}
+              {/* Left col: Blueprint Score */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/50 flex flex-col justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 tracking-wider uppercase mb-3">
-                  <Award className="h-4 w-4 text-brand-indigo" />
-                  Curation Score
+                  <Trophy className="h-4 w-4 text-zinc-500" />
+                  Influence Score
                 </div>
                 <div>
                   <span className="text-3xl font-extrabold text-slate-900">850</span>
-                  <span className="text-xs font-bold text-emerald-500 ml-1.5">+15.2%</span>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-1">Score calculated by curation upvotes and saves.</p>
+                  <span className="text-xs font-bold text-zinc-500 ml-1.5">+15.2%</span>
+                  <p className="text-[10px] text-slate-400 font-semibold mt-1">Saves and upvotes on things that shaped you.</p>
                 </div>
               </div>
 
               {/* Middle col: Connected Accounts */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/50 flex flex-col justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 tracking-wider uppercase mb-3">
-                  <Zap className="h-4 w-4 text-brand-pink" />
+                  <Lightning className="h-4 w-4 text-zinc-500" />
                   Niches Covered
                 </div>
                 <div>
@@ -96,15 +94,15 @@ export default function NetworkShowcase() {
               {/* Right col: Network status */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/50 flex flex-col justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 tracking-wider uppercase mb-3">
-                  <Activity className="h-4 w-4 text-brand-cyan" />
-                  Directory Status
+                  <Pulse className="h-4 w-4 text-zinc-500" />
+                  Shelf Status
                 </div>
                 <div>
                   <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                    <span className="h-2 w-2 rounded-full bg-zinc-900 animate-ping" />
                     Live & Active
                   </span>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-2.5">New follows added by the community every minute.</p>
+                  <p className="text-[10px] text-slate-400 font-semibold mt-2.5">New influences added by the community every minute.</p>
                 </div>
               </div>
 
@@ -115,13 +113,13 @@ export default function NetworkShowcase() {
           {/* Decorative floating widgets around the dashboard */}
           <div className="absolute -left-12 bottom-6 hidden lg:block p-3 rounded-xl bg-white border border-slate-200 shadow-md transform -rotate-6">
             <span className="text-xs font-bold text-slate-900 flex items-center gap-1">
-              <Check className="h-3 w-3 text-emerald-500" /> Verified Curation
+              <Check className="h-3 w-3 text-zinc-900" /> Verified Curation
             </span>
           </div>
 
           <div className="absolute -right-8 top-16 hidden lg:block p-3 rounded-xl bg-white border border-slate-200 shadow-md transform rotate-3">
             <span className="text-xs font-bold text-slate-900 flex items-center gap-1">
-              ✨ Total Follows: 1.4k
+              Total Follows: 1.4k
             </span>
           </div>
 

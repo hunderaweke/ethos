@@ -1,30 +1,33 @@
-import { ArrowRight, Paintbrush, Briefcase, Key } from "lucide-react";
+import { ArrowRight, PaintBrush, Briefcase, Key } from "@phosphor-icons/react";
 
 export default function TargetAudience() {
   const cards = [
     {
-      title: "Tech & Developers",
-      description: "Curate coding channels, GitHub repositories, dev newsletters, and articles you learn from.",
-      icon: Paintbrush,
-      bgClass: "from-blue-600 via-indigo-600 to-violet-600",
-      accent: "text-blue-200",
-      badge: "GitHub & DevBlogs",
+      title: "Engineers & Builders",
+      description: "Share the system designs, compilers, dev channels, and repos that shaped your engineering style.",
+      icon: PaintBrush,
+      bgClass: "bg-zinc-50 border border-zinc-200 text-zinc-900",
+      accent: "text-zinc-600",
+      badge: "Code & Architecture",
+      isDark: false,
     },
     {
-      title: "Design & Creatives",
-      description: "Share Pinterest boards, Instagram accounts, color palettes, and UI libraries that inspire your style.",
+      title: "Artists & Designers",
+      description: "Showcase the art movements, typographies, design portfolios, and UI kits that built your taste.",
       icon: Briefcase,
-      bgClass: "from-cyan-600 via-sky-600 to-blue-500",
-      accent: "text-cyan-200",
-      badge: "Inspiration & UI/UX",
+      bgClass: "bg-zinc-900 text-white",
+      accent: "text-zinc-300",
+      badge: "Visuals & Style",
+      isDark: true,
     },
     {
-      title: "Writers & Researchers",
-      description: "Display newsletter recommendations, podcast directories, substacks, and news feeds shaping your diet.",
+      title: "Thinkers & Writers",
+      description: "Display the philosophy essays, newsletters, history podcasts, and books that shaped your perspective.",
       icon: Key,
-      bgClass: "from-orange-500 via-pink-600 to-rose-600",
-      accent: "text-orange-200",
-      badge: "Substack & Podcasts",
+      bgClass: "bg-zinc-100 border border-zinc-200 text-zinc-900",
+      accent: "text-zinc-600",
+      badge: "Essays & Podcasts",
+      isDark: false,
     },
   ];
 
@@ -35,10 +38,10 @@ export default function TargetAudience() {
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Designed for everyone. Open to the world.
+            For every mind. Open to the world.
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            Tailor-made features that work whether you are starting a shop, building a resume, or configuring digital nodes.
+            Curate your shelf whether you are a developer, designer, writer, or lifelong learner.
           </p>
         </div>
 
@@ -49,29 +52,26 @@ export default function TargetAudience() {
             return (
               <div
                 key={idx}
-                className={`relative overflow-hidden rounded-3xl p-8 bg-gradient-to-br ${card.bgClass} text-white shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between min-h-[380px] group`}
+                className={`relative overflow-hidden rounded-3xl p-8 ${card.bgClass} shadow-md hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between min-h-[380px] group`}
               >
-                {/* Decorative glow */}
-                <div className="absolute top-0 right-0 h-40 w-40 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500" />
-
                 <div>
                   {/* Top row: Icon & Badge */}
                   <div className="flex justify-between items-center mb-6">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-md border border-white/25">
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${card.isDark ? "bg-white/10 border border-white/20" : "bg-black/5 border border-black/10"}`}>
                       <Icon className="h-5 w-5" />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-white/15 border border-white/25 px-3 py-1 rounded-full">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full ${card.isDark ? "bg-white/10 border border-white/20" : "bg-black/5 border border-black/10"}`}>
                       {card.badge}
                     </span>
                   </div>
 
                   {/* Title & Desc */}
                   <h3 className="text-2xl font-bold mb-2">{card.title}</h3>
-                  <p className="text-sm text-white/80 leading-relaxed font-medium">{card.description}</p>
+                  <p className={`text-sm leading-relaxed font-medium ${card.isDark ? "text-zinc-300" : "text-zinc-600"}`}>{card.description}</p>
                 </div>
 
                 {/* Bottom link action */}
-                <div className="mt-8 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer group/btn">
+                <div className={`mt-8 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer group/btn ${card.isDark ? "text-white" : "text-black"}`}>
                   <span>Learn more</span>
                   <ArrowRight className="h-4 w-4 transform group-hover/btn:translate-x-1 transition-transform" />
                 </div>

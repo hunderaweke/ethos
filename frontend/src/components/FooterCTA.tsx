@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { Sparkles, Check, ArrowRight } from "lucide-react";
+import { Check, ArrowCircleUpRightIcon } from "@phosphor-icons/react";
 
-export default function FooterCTA() {
+export default function FooterCTA({
+  onViewProfile,
+}: {
+  onViewProfile: () => void;
+}) {
   const [username, setUsername] = useState("");
   const [isClaimed, setIsClaimed] = useState(false);
 
@@ -9,42 +13,48 @@ export default function FooterCTA() {
     e.preventDefault();
     if (username.trim()) {
       setIsClaimed(true);
-      setTimeout(() => setIsClaimed(false), 3000);
+      setTimeout(() => {
+        setIsClaimed(false);
+        onViewProfile();
+      }, 800);
     }
   };
 
   return (
-    <section id="claim" className="relative py-24 overflow-hidden bg-slate-900 text-white">
-      {/* Background gradients */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-indigo-500/10 blur-3xl -z-10" />
-      <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-pink-500/10 blur-3xl -z-10" />
-
+    <section
+      id="claim"
+      className="relative py-24 overflow-hidden bg-black text-white border-t border-zinc-800"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        
         {/* Badge */}
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3.5 py-1 text-xs font-semibold tracking-wider text-indigo-300 uppercase mb-6">
-          <Sparkles className="h-3 w-3 text-indigo-400 fill-indigo-400" />
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3.5 py-1 text-xs font-semibold tracking-wider text-white uppercase mb-6">
           Get Started
         </div>
 
         {/* Heading */}
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mb-6 max-w-2xl mx-auto leading-tight">
-          Claim your curation handle today.
+          Claim your shelf handle today.
         </h2>
 
         {/* Claim Box */}
         <form
           onSubmit={handleClaim}
-          className="relative max-w-lg mx-auto p-1.5 rounded-full bg-white/5 backdrop-blur-md shadow-xl border border-white/10 flex items-center group transition-all focus-within:ring-2 focus-within:ring-indigo-500/50"
+          className="relative max-w-lg mx-auto p-1.5 rounded-full bg-white/5 backdrop-blur-md shadow-xl border border-white/10 flex items-center group transition-all focus-within:ring-2 focus-within:ring-white/20"
         >
           <div className="flex items-center pl-4 text-slate-400 font-medium">
-            <span className="text-indigo-400 font-bold select-none text-base">ethos.id/@</span>
+            <span className="text-zinc-500 font-bold select-none text-base">
+              blueprint.id/@
+            </span>
           </div>
           <input
             type="text"
             placeholder="handle"
             value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+            onChange={(e) =>
+              setUsername(
+                e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""),
+              )
+            }
             className="w-full pl-1 pr-3 py-2 text-base text-white placeholder-slate-500 bg-transparent focus:outline-none"
           />
           <button
@@ -53,13 +63,13 @@ export default function FooterCTA() {
           >
             {isClaimed ? (
               <>
-                <Check className="h-4 w-4 text-emerald-600" />
+                <Check className="h-4 w-4 text-black" />
                 Claimed!
               </>
             ) : (
               <>
                 Claim Handle
-                <ArrowRight className="h-4 w-4 text-slate-900" />
+                <ArrowCircleUpRightIcon size={22} color={"black"} />
               </>
             )}
           </button>
@@ -67,9 +77,8 @@ export default function FooterCTA() {
 
         {/* Bottom stats text */}
         <p className="mt-6 text-xs font-semibold text-slate-400">
-          Join 10k+ curators and creators. Free forever.
+          Join 10k+ thinkers, builders, and curators. Free forever.
         </p>
-
       </div>
 
       {/* Floating Decorative Cards */}
@@ -78,11 +87,13 @@ export default function FooterCTA() {
           <img
             src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=120"
             alt="Alex"
-            className="h-8 w-8 rounded-full object-cover"
+            className="h-8 w-8 rounded-full object-cover grayscale hover:grayscale-0 transition-[filter] duration-300"
           />
           <div>
             <h4 className="text-xs font-bold text-white">Alex Rivera</h4>
-            <p className="text-[10px] text-slate-400 font-medium">@technomad23 claimed</p>
+            <p className="text-[10px] text-slate-400 font-medium">
+              @technomad23 claimed
+            </p>
           </div>
         </div>
       </div>
@@ -92,11 +103,13 @@ export default function FooterCTA() {
           <img
             src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120"
             alt="Sarah"
-            className="h-8 w-8 rounded-full object-cover"
+            className="h-8 w-8 rounded-full object-cover grayscale hover:grayscale-0 transition-[filter] duration-300"
           />
           <div>
             <h4 className="text-xs font-bold text-white">Sarah Miller</h4>
-            <p className="text-[10px] text-slate-400 font-medium">@sarah_m claimed</p>
+            <p className="text-[10px] text-slate-400 font-medium">
+              @sarah_m claimed
+            </p>
           </div>
         </div>
       </div>

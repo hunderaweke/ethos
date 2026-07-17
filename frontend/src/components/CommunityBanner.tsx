@@ -1,5 +1,3 @@
-import { Sparkles } from "lucide-react";
-
 export default function CommunityBanner() {
   const members = [
     "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=120",
@@ -23,23 +21,22 @@ export default function CommunityBanner() {
               <img
                 src={img}
                 alt={`Member ${idx + 1}`}
-                className="h-14 w-14 rounded-2xl object-cover border-4 border-slate-50 shadow-md transform group-hover:scale-110 group-hover:-translate-y-1.5 transition-all duration-300"
+                className="h-14 w-14 rounded-2xl object-cover border-4 border-slate-50 shadow-md grayscale group-hover:grayscale-0 transform group-hover:scale-110 group-hover:-translate-y-1.5 transition-all duration-300"
               />
             </div>
           ))}
         </div>
 
         {/* Small Label */}
-        <p className="text-xs font-bold uppercase tracking-widest text-brand-indigo mb-3 font-sans">
+        <p className="text-xs font-bold uppercase tracking-widest text-black mb-3 font-sans">
           OUR USERS CURATE THE ENTIRE WEB
         </p>
 
         {/* Heading */}
         <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 max-w-2xl mx-auto mb-6">
-          Finally, a directory of recommendations that{" "}
-          <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-brand-indigo via-brand-violet to-brand-pink font-extrabold">
-            feels like you.
-            <span className="absolute left-0 bottom-1 h-1 w-full bg-gradient-to-r from-brand-indigo via-brand-violet to-brand-pink rounded-full opacity-35" />
+          Finally, a visual shelf of what{" "}
+          <span className="text-zinc-400 font-extrabold">
+            shaped you.
           </span>
         </h2>
 
@@ -49,20 +46,15 @@ export default function CommunityBanner() {
             href="#claim"
             className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 hover:bg-slate-800 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95 shadow-md shadow-slate-950/15"
           >
-            Create Your Curation List
-            <Sparkles className="h-4 w-4 text-amber-400" />
+            Build Your Shelf
           </a>
         </div>
 
         {/* Sub-label */}
         <p className="text-xs font-semibold text-slate-500">
-          No algorithm filters. Pure curation by people you trust.
+          No algorithmic feeds. Just the books and ideas that build real perspective.
         </p>
       </div>
-
-      {/* Subtle Background Art */}
-      <div className="absolute top-1/2 left-0 h-40 w-40 rounded-full bg-gradient-to-tr from-brand-indigo/10 to-transparent blur-2xl" />
-      <div className="absolute top-1/2 right-0 h-40 w-40 rounded-full bg-gradient-to-tl from-brand-pink/10 to-transparent blur-2xl" />
     </section>
   );
 }

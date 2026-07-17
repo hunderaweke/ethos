@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { FolderGit, Palette, ChevronRight, Lock, Sparkles } from "lucide-react";
+import { FolderSimple, Palette, CaretRight, Lock, BookOpen, VideoCamera, Microphone, Lightbulb } from "@phosphor-icons/react";
 
-export default function FeaturesGrid() {
-  const [selectedColor, setSelectedColor] = useState("indigo");
+export default function FeaturesGrid({ onViewProfile }: { onViewProfile: () => void }) {
+  const [selectedColor, setSelectedColor] = useState("gray");
 
   const colors = [
-    { name: "indigo", bg: "bg-indigo-600", value: "#4f46e5" },
-    { name: "pink", bg: "bg-pink-600", value: "#ec4899" },
-    { name: "cyan", bg: "bg-cyan-500", value: "#06b6d4" },
-    { name: "emerald", bg: "bg-emerald-600", value: "#10b981" },
-    { name: "amber", bg: "bg-amber-500", value: "#f59e0b" },
+    { name: "white", bg: "bg-white border border-zinc-300", value: "#ffffff" },
+    { name: "light gray", bg: "bg-zinc-200", value: "#e4e4e7" },
+    { name: "gray", bg: "bg-zinc-500", value: "#71717a" },
+    { name: "dark gray", bg: "bg-zinc-800", value: "#27272a" },
+    { name: "black", bg: "bg-black", value: "#000000" },
   ];
 
   return (
@@ -19,10 +19,10 @@ export default function FeaturesGrid() {
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Everything you need, built to share
+            Your intellectual shelf, built to share
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            Manage your curated follows, search other builders' directories, and share your personal notes on who you follow.
+            Showcase your influences, explore what built other minds, and share personal notes on how each item shaped you.
           </p>
         </div>
 
@@ -35,16 +35,16 @@ export default function FeaturesGrid() {
               {/* Graphic Mockup */}
               <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 h-48 mb-6 flex flex-col justify-between relative overflow-hidden">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  <FolderGit className="h-3.5 w-3.5" /> Curate / Follow Shelf
+                  <FolderSimple className="h-3.5 w-3.5" /> Influences / Books Shelf
                 </div>
                 
                 <div className="flex flex-col gap-2">
                   <div className="p-2 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between text-xs font-bold text-slate-700">
-                    <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-brand-indigo" /> youtube_channels.json</span>
+                    <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-brand-indigo" /> books_read.json</span>
                     <span className="text-[10px] text-slate-400 font-semibold">14 items</span>
                   </div>
                   <div className="p-2 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between text-xs font-bold text-slate-700">
-                    <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-brand-indigo" /> github_stars.json</span>
+                    <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-brand-indigo" /> design_mentors.json</span>
                     <span className="text-[10px] text-slate-400 font-semibold">28 items</span>
                   </div>
                 </div>
@@ -52,13 +52,13 @@ export default function FeaturesGrid() {
                 <div className="absolute -right-4 -bottom-4 h-16 w-16 bg-brand-indigo/10 rounded-full blur-xl" />
               </div>
 
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Personal Dashboard</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Personal Shelf</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                A clean space to manage all your follows. Select platforms, input username handles, add niche tags, and write a quick description explaining why you recommend them.
+                A beautiful shelf to manage your influences. Select media types, add tags, and write a note on how it shaped your worldview.
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center text-xs font-bold text-brand-indigo hover:text-indigo-700 cursor-pointer">
-              Read curation guide <ChevronRight className="h-3.5 w-3.5 ml-1" />
+            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center text-xs font-bold text-brand-indigo hover:text-zinc-600 cursor-pointer">
+              Read curation guide <CaretRight className="h-3.5 w-3.5 ml-1" />
             </div>
           </div>
 
@@ -67,29 +67,29 @@ export default function FeaturesGrid() {
             <div>
               {/* Graphic Mockup */}
               <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 h-48 mb-6 flex flex-wrap gap-3.5 items-center justify-center relative overflow-hidden">
-                <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-xs font-semibold text-xs text-slate-800 flex items-center gap-1">
-                  💻 Tech
+                <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-xs font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5" /> Books
                 </span>
-                <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-xs font-semibold text-xs text-slate-800 flex items-center gap-1">
-                  🎨 Design
+                <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-xs font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                  <VideoCamera className="h-3.5 w-3.5" /> Creators
                 </span>
-                <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-xs font-semibold text-xs text-slate-800 flex items-center gap-1">
-                  💪 Fitness
+                <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-xs font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                  <Microphone className="h-3.5 w-3.5" /> Podcasts
                 </span>
-                <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-xs font-semibold text-xs text-slate-800 flex items-center gap-1">
-                  🎮 Gaming
+                <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-xs font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                  <Lightbulb className="h-3.5 w-3.5" /> Essays
                 </span>
                 
                 <div className="absolute -left-4 -bottom-4 h-16 w-16 bg-brand-pink/10 rounded-full blur-xl" />
               </div>
 
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Search & Discovery</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Discover Perspectives</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Browse through the directory with powerful filters. Sort by specific platforms, filter by niches, or search keywords inside recommendations.
+                Explore other users' shelves. Search by specific books, channels, or platforms to see who was shaped by what.
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center text-xs font-bold text-brand-indigo hover:text-indigo-700 cursor-pointer">
-              Explore search filters <ChevronRight className="h-3.5 w-3.5 ml-1" />
+            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center text-xs font-bold text-brand-indigo hover:text-zinc-600 cursor-pointer">
+              Explore search filters <CaretRight className="h-3.5 w-3.5 ml-1" />
             </div>
           </div>
 
@@ -118,19 +118,21 @@ export default function FeaturesGrid() {
                 </div>
 
                 <div className="p-2 rounded-xl bg-white border border-slate-200/80 shadow-xs text-center text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                  Custom theme: <span className="uppercase text-brand-indigo font-black">{selectedColor}</span>
+                  Custom theme: <span className="uppercase text-black font-black">{selectedColor}</span>
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Shareable Profiles</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Shareable Mind-Shelf</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Every user gets a custom @handle link (e.g. ethos.id/@technomad23) to share on their bio or profiles, making their lists instantly accessible to anyone.
+                Every user gets a custom @handle link (e.g. blueprint.id/@technomad23) to share on their bio, making their personal bookshelf instantly readable.
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center text-xs font-bold text-brand-indigo hover:text-indigo-700 cursor-pointer">
-              View demo profiles <ChevronRight className="h-3.5 w-3.5 ml-1" />
-            </div>
+            <button 
+              onClick={onViewProfile}
+              className="mt-6 pt-4 border-t border-slate-100 flex items-center text-xs font-bold text-brand-indigo hover:text-zinc-600 cursor-pointer bg-transparent border-none w-full justify-start text-left"
+            >
+              View demo profiles <CaretRight className="h-3.5 w-3.5 ml-1" />
+            </button>
           </div>
 
         </div>

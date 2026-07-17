@@ -1,4 +1,4 @@
-import { ShieldAlert, Key, Server, EyeOff, FileCode, ArrowRight } from "lucide-react";
+import { ShieldWarning, Key, HardDrives, EyeSlash, FileCode, ArrowRight } from "@phosphor-icons/react";
 
 export default function PrivacyCard() {
   const securityItems = [
@@ -10,12 +10,12 @@ export default function PrivacyCard() {
     {
       title: "You Own the Data",
       desc: "Export your follows lists, notes, and tags in CSV or JSON at any moment.",
-      icon: Server,
+      icon: HardDrives,
     },
     {
       title: "No Ad-tracking",
       desc: "We do not track your clicks, browser fingerprints, or profile interactions.",
-      icon: EyeOff,
+      icon: EyeSlash,
     },
     {
       title: "Open Source Codebase",
@@ -33,18 +33,18 @@ export default function PrivacyCard() {
           
           {/* Top Lock/Shield Icon */}
           <div className="flex justify-center mb-6">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-200">
-              <ShieldAlert className="h-7 w-7" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-white shadow-xs">
+              <ShieldWarning className="h-7 w-7" />
             </div>
           </div>
 
           {/* Heading */}
           <div className="text-center max-w-xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 mb-4">
-              Built from scratch for curation privacy
+              Built from scratch for mental privacy
             </h2>
             <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
-              Ethos is built on privacy-first principles. We don't sell your data, track your recommendation logs, or show you ads. Ever.
+              Blueprint is built on privacy-first principles. We don't sell your data, track what you browse, or show you ads. Ever.
             </p>
           </div>
 
@@ -75,7 +75,7 @@ export default function PrivacyCard() {
           </div>
 
           {/* Decorative glow decoration */}
-          <div className="absolute -left-12 -bottom-12 h-24 w-24 bg-emerald-500/5 rounded-full blur-xl" />
+          <div className="absolute -left-12 -bottom-12 h-24 w-24 bg-zinc-500/5 rounded-full blur-xl" />
         </div>
 
       </div>

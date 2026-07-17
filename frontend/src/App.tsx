@@ -1,41 +1,38 @@
+import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import ProfileShowcase from "./components/ProfileShowcase";
-import Highlights from "./components/Highlights";
 import CommunityBanner from "./components/CommunityBanner";
 import NetworkShowcase from "./components/NetworkShowcase";
 import FeaturedBanner from "./components/FeaturedBanner";
 import FeaturesGrid from "./components/FeaturesGrid";
 import InteractiveFeatures from "./components/InteractiveFeatures";
-import IntegrationCloud from "./components/IntegrationCloud";
-import TargetAudience from "./components/TargetAudience";
-import OwnershipSection from "./components/OwnershipSection";
-import PrivacyCard from "./components/PrivacyCard";
-import FAQSection from "./components/FAQSection";
-import FooterCTA from "./components/FooterCTA";
 import Footer from "./components/Footer";
+import HandlePage from "./components/HandlePage";
 
 function App() {
+  const [viewProfile, setViewProfile] = useState<string | null>(null);
+
+  const handleShowProfile = () => {
+    setViewProfile("@technomad23");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (viewProfile) {
+    return <HandlePage onBack={() => setViewProfile(null)} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
-      <Navbar />
+      <Navbar onViewProfile={handleShowProfile} />
       <main>
-        <Hero />
-        <ProfileShowcase />
-        <Highlights />
+        <Hero onViewProfile={handleShowProfile} />
+        <FeaturesGrid onViewProfile={handleShowProfile} />
         <CommunityBanner />
         <NetworkShowcase />
         <FeaturedBanner />
-        <FeaturesGrid />
         <InteractiveFeatures />
-        <IntegrationCloud />
-        <TargetAudience />
-        <OwnershipSection />
-        <PrivacyCard />
-        <FAQSection />
-        <FooterCTA />
       </main>
-      <Footer />
+      <Footer onViewProfile={handleShowProfile} />
     </div>
   );
 }
