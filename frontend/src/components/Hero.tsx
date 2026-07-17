@@ -45,7 +45,7 @@ export default function Hero({ onViewProfile }: { onViewProfile: () => void }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative overflow-hidden bg-white pt-24 pb-44 lg:pt-36 lg:pb-56 border-b border-zinc-200"
+      className="relative overflow-hidden bg-white pt-44 pb-44 lg:pt-56 lg:pb-56 border-b border-zinc-200"
     >
       {/* Interactive Blueprint Background Pattern (Light Grayscale) */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
@@ -150,7 +150,7 @@ export default function Hero({ onViewProfile }: { onViewProfile: () => void }) {
       {/* Floating Card Elements (Visual decorations from reference) */}
       <div
         onClick={onViewProfile}
-        className="hidden xl:block absolute left-12 top-24 w-80 p-4 rounded-2xl bg-white shadow-md border border-zinc-200 animate-float-slow transition-transform hover:-translate-y-2 cursor-pointer hover:border-black/50"
+        className="hidden xl:block absolute left-12 top-96 w-80 p-4 rounded-2xl bg-white shadow-md border border-zinc-200 animate-float-slow transition-transform hover:-translate-y-2 cursor-pointer hover:border-black/50"
       >
         <div className="flex items-center gap-3">
           <img
@@ -236,7 +236,7 @@ export default function Hero({ onViewProfile }: { onViewProfile: () => void }) {
 
       <div
         onClick={onViewProfile}
-        className="hidden xl:block absolute right-12 top-24 w-80 p-4 rounded-2xl bg-white shadow-md border border-zinc-200 animate-float-medium transition-transform hover:-translate-y-2 cursor-pointer hover:border-black/50"
+        className="hidden xl:block absolute right-12 top-96 w-80 p-4 rounded-2xl bg-white shadow-md border border-zinc-200 animate-float-medium transition-transform hover:-translate-y-2 cursor-pointer hover:border-black/50"
       >
         <div className="flex items-center gap-3">
           <img
