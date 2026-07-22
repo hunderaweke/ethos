@@ -30,8 +30,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "s
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white border border-zinc-200 w-full max-w-md rounded-sm shadow-2xl overflow-hidden relative group">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in cursor-pointer"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white border border-zinc-200 w-full max-w-md rounded-sm shadow-2xl overflow-hidden relative group cursor-default"
+      >
         
         {/* Minimal Blueprint grid pattern overlay */}
         <div 
@@ -47,11 +53,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "s
 
         {/* Close Button */}
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-black p-1 rounded-sm cursor-pointer z-10 transition-colors"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute top-4 right-4 text-zinc-400 hover:text-black hover:bg-zinc-100 p-2 rounded-sm cursor-pointer z-30 transition-all pointer-events-auto"
           title="Close modal"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4 text-zinc-600" />
         </button>
 
         <div className="p-8 relative z-10 space-y-6 text-center">
