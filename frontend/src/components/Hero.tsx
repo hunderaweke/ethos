@@ -12,7 +12,7 @@ import * as PhosphorIcons from "@phosphor-icons/react";
 import { generateVibrantColor, getSocialMediaColor } from "../utils/color";
 import integrationsData from "../data/integrations.json";
 
-export default function Hero({ onViewProfile }: { onViewProfile: () => void }) {
+export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile: () => void; onViewDashboard?: () => void }) {
   const [username, setUsername] = useState("");
   const [isClaimed, setIsClaimed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -24,7 +24,11 @@ export default function Hero({ onViewProfile }: { onViewProfile: () => void }) {
       setIsClaimed(true);
       setTimeout(() => {
         setIsClaimed(false);
-        onViewProfile();
+        if (onViewDashboard) {
+          onViewDashboard();
+        } else {
+          onViewProfile();
+        }
       }, 800);
     }
   };

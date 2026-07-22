@@ -2,10 +2,11 @@ import { XLogoIcon, DiscordLogoIcon, GithubLogoIcon } from "@phosphor-icons/reac
 
 interface FooterProps {
   onViewProfile?: () => void;
+  onViewDashboard?: () => void;
   onGoHome?: () => void;
 }
 
-export default function Footer({ onViewProfile, onGoHome }: FooterProps) {
+export default function Footer({ onViewProfile, onViewDashboard, onGoHome }: FooterProps) {
   return (
     <footer className="w-full bg-zinc-950 text-zinc-400 pt-16 mt-12 border-t border-zinc-900">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-12">
@@ -43,6 +44,16 @@ export default function Footer({ onViewProfile, onGoHome }: FooterProps) {
                     </button>
                   </li>
                 )}
+                {onViewDashboard && (
+                  <li>
+                    <button
+                      onClick={onViewDashboard}
+                      className="hover:text-white transition-colors cursor-pointer bg-transparent border-none text-left p-0 font-semibold text-white"
+                    >
+                      Creator Dashboard
+                    </button>
+                  </li>
+                )}
                 {onViewProfile && (
                   <li>
                     <button
@@ -55,7 +66,6 @@ export default function Footer({ onViewProfile, onGoHome }: FooterProps) {
                 )}
                 <li><a href="#discovery" className="hover:text-white transition-colors">Discover Perspectives</a></li>
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
               </ul>
             </div>
             {/* Company Links */}

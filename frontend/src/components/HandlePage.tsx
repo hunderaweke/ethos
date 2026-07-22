@@ -7,9 +7,10 @@ import type { CurationItem } from "./CurationCard";
 
 interface HandlePageProps {
   onBack: () => void;
+  onViewDashboard?: () => void;
 }
 
-export default function HandlePage({ onBack }: HandlePageProps) {
+export default function HandlePage({ onBack, onViewDashboard }: HandlePageProps) {
   const [copied, setCopied] = useState(false);
   const [savedItems, setSavedItems] = useState<Record<string, boolean>>({});
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -185,8 +186,17 @@ export default function HandlePage({ onBack }: HandlePageProps) {
             </span>
           </div>
 
-          {/* Right Actions: Handle Badge & Share CTA */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Right Actions: Handle Badge, Dashboard & Share CTA */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {onViewDashboard && (
+              <button
+                onClick={onViewDashboard}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-full text-xs font-bold text-zinc-800 transition-all cursor-pointer"
+              >
+                <span>Dashboard</span>
+              </button>
+            )}
+
             <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-zinc-100/90 border border-zinc-200 rounded-full text-xs font-bold text-zinc-700">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-slate-800 font-sans">@technomad23</span>
