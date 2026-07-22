@@ -110,7 +110,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "s
                 {isLoading ? (
                   <div className="h-4 w-4 border-2 border-zinc-400 border-t-black rounded-full animate-spin" />
                 ) : (
-                  <GoogleLogo className="h-5 w-5 shrink-0 text-[#4285F4] transition-transform group-hover/btn:scale-110" weight="bold" />
+                  <GoogleLogo className="h-5 w-5 shrink-0 text-black transition-transform group-hover/btn:scale-110" weight="bold" />
                 )}
                 <span>{isLoading ? "Authenticating with Google..." : `Continue with Google to ${mode === "signup" ? "Sign Up" : "Log In"}`}</span>
               </button>
