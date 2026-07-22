@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { List, X, SlidersHorizontal, ChartLineUp, User, ArrowRight } from "@phosphor-icons/react";
+import { List, X, ArrowRight, SignOut } from "@phosphor-icons/react";
 
 interface NavbarProps {
   onViewProfile: () => void;
   onViewDashboard?: () => void;
   onOpenAuth?: (mode: "login" | "signup") => void;
+  isLoggedIn?: boolean;
+  onLogout?: () => void;
 }
 
-export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth }: NavbarProps) {
+export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth, isLoggedIn, onLogout }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -22,9 +24,9 @@ export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth }: N
           >
             Mind-Shelf
           </button>
-          {onViewDashboard && (
-            <button 
-              onClick={onViewDashboard} 
+          {isLoggedIn && onViewDashboard && (
+            <button
+              onClick={onViewDashboard}
               className="inline-flex items-center text-sm font-semibold text-slate-900 hover:text-black transition-colors cursor-pointer bg-transparent border-none font-bold"
             >
               Dashboard
@@ -62,18 +64,40 @@ export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth }: N
 
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <button
-            onClick={() => onOpenAuth ? onOpenAuth("login") : (onViewDashboard || onViewProfile)()}
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-black transition-colors cursor-pointer bg-transparent border-none"
-          >
-            Log in
-          </button>
-          <button
-            onClick={() => onOpenAuth ? onOpenAuth("signup") : (onViewDashboard || onViewProfile)()}
-            className="inline-flex items-center gap-1.5 rounded-sm bg-slate-900 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-md shadow-slate-950/10 cursor-pointer border-none"
-          >
-            Sign Up
-          </button>
+          {isLoggedIn ? (
+            <>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-black transition-colors cursor-pointer bg-transparent border-none"
+                >
+                  <SignOut className="h-4 w-4" />
+                  Log out
+                </button>
+              )}
+              <button
+                onClick={() => (onViewDashboard || onViewProfile)()}
+                className="inline-flex items-center gap-1.5 rounded-sm bg-slate-900 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-md shadow-slate-950/10 cursor-pointer border-none"
+              >
+                Dashboard
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => onOpenAuth ? onOpenAuth("login") : (onViewDashboard || onViewProfile)()}
+                className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-black transition-colors cursor-pointer bg-transparent border-none"
+              >
+                Log in
+              </button>
+              <button
+                onClick={() => onOpenAuth ? onOpenAuth("signup") : (onViewDashboard || onViewProfile)()}
+                className="inline-flex items-center gap-1.5 rounded-sm bg-slate-900 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-md shadow-slate-950/10 cursor-pointer border-none"
+              >
+                Sign Up
+              </button>
+            </>
+          )}
         </div>
 
         {/* Floating Mobile Hamburger Menu Panel */}
@@ -104,7 +128,7 @@ export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth }: N
                 <ArrowRight className="h-3.5 w-3.5 text-zinc-400" />
               </button>
 
-              {onViewDashboard && (
+              {isLoggedIn && onViewDashboard && (
                 <button
                   onClick={() => {
                     onViewDashboard();
@@ -137,29 +161,44 @@ export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth }: N
             </div>
 
             {/* Mobile Auth Actions */}
-            <div className="relative z-10 pt-3 border-t border-zinc-200/80 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => {
-                  if (onOpenAuth) onOpenAuth("login");
-                  else if (onViewDashboard) onViewDashboard();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full py-2 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-sm text-xs font-bold text-zinc-900 transition-colors cursor-pointer text-center"
-              >
-                Log In
-              </button>
+            {isLoggedIn ? (
+              <div className="relative z-10 pt-3 border-t border-zinc-200/80">
+                <button
+                  onClick={() => {
+                    if (onLogout) onLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2 flex items-center justify-center gap-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-sm text-xs font-bold text-zinc-900 transition-colors cursor-pointer text-center"
+                >
+                  <SignOut className="h-3.5 w-3.5" />
+                  Log Out
+                </button>
+              </div>
+            ) : (
+              <div className="relative z-10 pt-3 border-t border-zinc-200/80 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => {
+                    if (onOpenAuth) onOpenAuth("login");
+                    else if (onViewDashboard) onViewDashboard();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-sm text-xs font-bold text-zinc-900 transition-colors cursor-pointer text-center"
+                >
+                  Log In
+                </button>
 
-              <button
-                onClick={() => {
-                  if (onOpenAuth) onOpenAuth("signup");
-                  else if (onViewDashboard) onViewDashboard();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full py-2 bg-black text-white hover:bg-zinc-900 rounded-sm text-xs font-bold transition-colors cursor-pointer text-center shadow-2xs"
-              >
-                Sign Up
-              </button>
-            </div>
+                <button
+                  onClick={() => {
+                    if (onOpenAuth) onOpenAuth("signup");
+                    else if (onViewDashboard) onViewDashboard();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2 bg-black text-white hover:bg-zinc-900 rounded-sm text-xs font-bold transition-colors cursor-pointer text-center shadow-2xs"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
 
           </div>
         )}

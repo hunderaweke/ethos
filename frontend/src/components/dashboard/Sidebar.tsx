@@ -1,4 +1,4 @@
-import { SlidersHorizontal, ChartLineUp, Plugs, User, Eye, ArrowLeft, SignOut, X } from "@phosphor-icons/react";
+import { SlidersHorizontal, ChartLineUp, User, Eye, ArrowLeft, SignOut, X } from "@phosphor-icons/react";
 import type { DashboardTab, HandleSettings } from "../../types";
 
 interface SidebarProps {
@@ -53,8 +53,9 @@ export default function Sidebar({
         <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-sm flex items-center gap-3 group">
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
+              src={handleSettings.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"}
               alt="Avatar"
+              referrerPolicy="no-referrer"
               className="h-9 w-9 rounded-sm object-cover border border-zinc-200"
             />
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white absolute -bottom-0.5 -right-0.5 animate-pulse" />
@@ -100,20 +101,6 @@ export default function Sidebar({
               <span>Analytics</span>
             </span>
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          </button>
-
-          <button
-            onClick={() => { setActiveTab("integrations"); if (onCloseMobile) onCloseMobile(); }}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-sm text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "integrations"
-                ? "bg-black text-white shadow-2xs"
-                : "text-zinc-600 hover:text-black hover:bg-zinc-100"
-            }`}
-          >
-            <span className="flex items-center gap-2.5">
-              <Plugs className="h-4 w-4" />
-              <span>Integrations</span>
-            </span>
           </button>
 
           <button

@@ -18,14 +18,17 @@ import {
   Palette,
   XLogo
 } from "@phosphor-icons/react";
-import type { CurationItem } from "../../types";
+import type { CurationItem, ResourceKind } from "../../types";
 import { generateVibrantColor, getSocialMediaColor } from "../../utils/color";
+import ResourceKindIcon, { RESOURCE_KIND_LABELS, ResourceKindBadge } from "../ResourceKindIcon";
 
 interface ManageShelfTabProps {
   items: CurationItem[];
   filteredItems: CurationItem[];
   filterCategory: string;
   setFilterCategory: (cat: string) => void;
+  filterKind: string;
+  setFilterKind: (kind: string) => void;
   activeTag: string;
   setActiveTag: (tag: string) => void;
   searchQuery: string;
@@ -38,15 +41,24 @@ interface ManageShelfTabProps {
   onRequestDelete: (item: CurationItem) => void;
   isCategoryOpen: boolean;
   setIsCategoryOpen: (open: boolean) => void;
+  isKindOpen: boolean;
+  setIsKindOpen: (open: boolean) => void;
   isTagOpen: boolean;
   setIsTagOpen: (open: boolean) => void;
 }
+
+const KINDS: { id: string; label: string }[] = [
+  { id: "all", label: "All Kinds" },
+  ...(Object.entries(RESOURCE_KIND_LABELS) as [ResourceKind, string][]).map(([id, label]) => ({ id, label })),
+];
 
 export default function ManageShelfTab({
   items,
   filteredItems,
   filterCategory,
   setFilterCategory,
+  filterKind,
+  setFilterKind,
   activeTag,
   setActiveTag,
   searchQuery,
@@ -59,10 +71,13 @@ export default function ManageShelfTab({
   onRequestDelete,
   isCategoryOpen,
   setIsCategoryOpen,
+  isKindOpen,
+  setIsKindOpen,
   isTagOpen,
   setIsTagOpen
 }: ManageShelfTabProps) {
   const categoryRef = useRef<HTMLDivElement>(null);
+  const kindRef = useRef<HTMLDivElement>(null);
   const tagRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,13 +85,16 @@ export default function ManageShelfTab({
       if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
         setIsCategoryOpen(false);
       }
+      if (kindRef.current && !kindRef.current.contains(event.target as Node)) {
+        setIsKindOpen(false);
+      }
       if (tagRef.current && !tagRef.current.contains(event.target as Node)) {
         setIsTagOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [setIsCategoryOpen, setIsTagOpen]);
+  }, [setIsCategoryOpen, setIsKindOpen, setIsTagOpen]);
 
   const categories = [
     { id: "all", label: "All Categories" },
@@ -101,7 +119,7 @@ export default function ManageShelfTab({
     }
   };
 
-  const hasActiveFilters = filterCategory !== "all" || activeTag !== "all" || searchQuery !== "";
+  const hasActiveFilters = filterCategory !== "all" || filterKind !== "all" || activeTag !== "all" || searchQuery !== "";
 
   return (
     <div className="bg-white border border-zinc-200 p-4 sm:p-6 rounded-sm shadow-2xs space-y-6 relative z-30">
@@ -138,7 +156,7 @@ export default function ManageShelfTab({
           {/* Category Custom Dropdown */}
           <div className="relative" ref={categoryRef}>
             <button
-              onClick={() => { setIsCategoryOpen(!isCategoryOpen); setIsTagOpen(false); }}
+              onClick={() => { setIsCategoryOpen(!isCategoryOpen); setIsKindOpen(false); setIsTagOpen(false); }}
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-sm text-xs font-bold transition-all cursor-pointer border shadow-2xs ${
                 filterCategory !== "all" 
                   ? "bg-black text-white border-black" 
@@ -188,10 +206,68 @@ export default function ManageShelfTab({
             )}
           </div>
 
+          {/* Kind Custom Dropdown */}
+          <div className="relative" ref={kindRef}>
+            <button
+              onClick={() => { setIsKindOpen(!isKindOpen); setIsCategoryOpen(false); setIsTagOpen(false); }}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-sm text-xs font-bold transition-all cursor-pointer border shadow-2xs ${
+                filterKind !== "all"
+                  ? "bg-black text-white border-black"
+                  : "bg-zinc-50 hover:bg-zinc-100 text-zinc-800 border-zinc-200"
+              }`}
+            >
+              {filterKind !== "all" ? (
+                <ResourceKindIcon kind={filterKind as ResourceKind} className="h-3.5 w-3.5 text-white" />
+              ) : (
+                <Funnel className="h-3.5 w-3.5 text-zinc-500" />
+              )}
+              <span>
+                {filterKind === "all" ? "Kind: All" : KINDS.find(k => k.id === filterKind)?.label}
+              </span>
+              <CaretDown className={`h-3.5 w-3.5 transition-transform duration-200 ${isKindOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isKindOpen && (
+              <div className="absolute top-full left-0 mt-1.5 w-48 bg-white border border-zinc-200 rounded-sm shadow-xl z-50 py-1.5 overflow-hidden animate-fade-in">
+                <div className="px-3 py-1.5 text-[10px] font-bold capitalize tracking-wider text-zinc-400 border-b border-zinc-100">
+                  Filter by kind
+                </div>
+                <div className="max-h-56 overflow-y-auto py-1">
+                  {KINDS.map((kind) => {
+                    const count = kind.id === "all"
+                      ? items.length
+                      : items.filter(i => i.resourceKind === kind.id).length;
+                    return (
+                      <button
+                        key={kind.id}
+                        onClick={() => {
+                          setFilterKind(kind.id);
+                          setIsKindOpen(false);
+                        }}
+                        className={`w-full text-left px-3.5 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                          filterKind === kind.id ? "bg-zinc-100 text-black font-bold" : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          {filterKind === kind.id && <Check className="h-3.5 w-3.5 text-black" />}
+                          {kind.id !== "all" && <ResourceKindIcon kind={kind.id as ResourceKind} className="h-3.5 w-3.5 text-zinc-400" />}
+                          <span>{kind.label}</span>
+                        </span>
+                        <span className="text-[10px] text-zinc-400 font-bold bg-zinc-100 px-1.5 py-0.5 rounded-sm">
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Tag Custom Dropdown */}
           <div className="relative" ref={tagRef}>
             <button
-              onClick={() => { setIsTagOpen(!isTagOpen); setIsCategoryOpen(false); }}
+              onClick={() => { setIsTagOpen(!isTagOpen); setIsCategoryOpen(false); setIsKindOpen(false); }}
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-sm text-xs font-bold transition-all cursor-pointer border shadow-2xs ${
                 activeTag !== "all" 
                   ? "bg-black text-white border-black" 
@@ -269,6 +345,7 @@ export default function ManageShelfTab({
             <button
               onClick={() => {
                 setFilterCategory("all");
+                setFilterKind("all");
                 setActiveTag("all");
                 setSearchQuery("");
               }}
@@ -312,12 +389,21 @@ export default function ManageShelfTab({
               >
                 <div className="flex items-start gap-3.5">
                   
-                  {/* Type Icon Box with Social Color */}
-                  <div 
-                    className="h-10 w-10 shrink-0 border rounded-sm flex items-center justify-center font-bold text-sm"
+                  {/* Resource Image (falls back to a type icon when none was fetched) */}
+                  <div
+                    className="h-10 w-10 shrink-0 border rounded-sm overflow-hidden flex items-center justify-center font-bold text-sm"
                     style={{ color: iconColor, backgroundColor: iconBg, borderColor: iconBorder }}
                   >
-                    {renderTypeIcon(item.type)}
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        referrerPolicy="no-referrer"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      renderTypeIcon(item.type)
+                    )}
                   </div>
 
                   <div>
@@ -332,6 +418,8 @@ export default function ManageShelfTab({
                         {renderTypeIcon(item.type)}
                         <span>{item.type}</span>
                       </span>
+
+                      {item.resourceKind && <ResourceKindBadge kind={item.resourceKind} />}
 
                       {isPinned && (
                         <span className="text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-sm inline-flex items-center gap-1">

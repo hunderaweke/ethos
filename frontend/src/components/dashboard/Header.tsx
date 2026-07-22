@@ -19,7 +19,6 @@ export default function Header({
       case "items": return "Mind-Shelf Items";
       case "analytics": return "Analytics & Graph";
       case "settings": return "Profile & Handle Settings";
-      case "integrations": return "Integrations & Feeds";
     }
   };
 

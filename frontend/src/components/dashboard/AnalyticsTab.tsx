@@ -1,11 +1,64 @@
+import { useEffect, useState } from "react";
 import { ChartLineUp, TrendUp } from "@phosphor-icons/react";
+import {
+  getCategoryBreakdown,
+  getLeaderboard,
+  type CategoryBreakdown,
+  type LeaderboardItem,
+} from "../../utils/api";
+import { getSocialMediaColor } from "../../utils/color";
+
+// Friendly labels for the coarse ItemType categories.
+const TYPE_LABELS: Record<string, string> = {
+  book: "Books & Literature",
+  essay: "Essays & Articles",
+  youtube: "YouTube & Video",
+  podcast: "Podcasts & Audio",
+  x: "X / Twitter",
+  design: "Design",
+};
+
+const typeLabel = (t: string) => TYPE_LABELS[t] ?? t.charAt(0).toUpperCase() + t.slice(1);
 
 export default function AnalyticsTab() {
+  const [breakdown, setBreakdown] = useState<CategoryBreakdown[] | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetched every time the tab mounts (i.e. whenever the user opens Analytics),
+  // so the numbers reflect current state rather than a stale snapshot.
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([getCategoryBreakdown(), getLeaderboard(5)])
+      .then(([b, l]) => {
+        if (cancelled) return;
+        setBreakdown(b.sort((a, z) => z.item_count - a.item_count));
+        setLeaderboard(l);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBreakdown([]);
+          setLeaderboard([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const maxViews = breakdown && breakdown.length
+    ? Math.max(...breakdown.map(b => b.view_count), 1)
+    : 1;
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Left Column: Category Distribution & Performance */}
+
+        {/* Left Column: Category Distribution */}
         <div className="lg:col-span-7 bg-white border border-zinc-200 p-6 rounded-sm shadow-2xs space-y-6">
           <div>
             <h3 className="text-sm font-black text-zinc-950 flex items-center gap-2">
@@ -17,60 +70,38 @@ export default function AnalyticsTab() {
             </p>
           </div>
 
-          <div className="space-y-4 pt-2">
-            <div>
-              <div className="flex justify-between text-xs font-bold text-zinc-700 mb-1">
-                <span>Books & Literature</span>
-                <span>35% (4.2k views)</span>
-              </div>
-              <div className="w-full bg-zinc-100 h-2 rounded-sm overflow-hidden">
-                <div className="bg-black h-full w-[35%]" />
-              </div>
+          {loading ? (
+            <p className="text-xs font-bold text-zinc-400 py-6">Loading breakdown…</p>
+          ) : breakdown && breakdown.length > 0 ? (
+            <div className="space-y-4 pt-2">
+              {breakdown.map((row) => {
+                // Bar length reflects views relative to the top category, so the
+                // chart reads as "attention earned", not just item count.
+                const width = Math.max(4, Math.round((row.view_count / maxViews) * 100));
+                const color = getSocialMediaColor(row.type, 1);
+                return (
+                  <div key={row.type}>
+                    <div className="flex justify-between text-xs font-bold text-zinc-700 mb-1">
+                      <span>{typeLabel(row.type)}</span>
+                      <span className="text-zinc-500">
+                        {row.share_pct}% · {row.item_count} {row.item_count === 1 ? "item" : "items"} · {row.view_count.toLocaleString()} views
+                      </span>
+                    </div>
+                    <div className="w-full bg-zinc-100 h-2 rounded-sm overflow-hidden">
+                      <div className="h-full rounded-sm" style={{ width: `${width}%`, backgroundColor: color }} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            <div>
-              <div className="flex justify-between text-xs font-bold text-zinc-700 mb-1">
-                <span>Technical Essays</span>
-                <span>25% (3.1k views)</span>
-              </div>
-              <div className="w-full bg-zinc-100 h-2 rounded-sm overflow-hidden">
-                <div className="bg-zinc-800 h-full w-[25%]" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs font-bold text-zinc-700 mb-1">
-                <span>YouTube & Video Tutorials</span>
-                <span>20% (2.5k views)</span>
-              </div>
-              <div className="w-full bg-zinc-100 h-2 rounded-sm overflow-hidden">
-                <div className="bg-zinc-600 h-full w-[20%]" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs font-bold text-zinc-700 mb-1">
-                <span>Podcasts & Audio</span>
-                <span>12% (1.5k views)</span>
-              </div>
-              <div className="w-full bg-zinc-100 h-2 rounded-sm overflow-hidden">
-                <div className="bg-zinc-400 h-full w-[12%]" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs font-bold text-zinc-700 mb-1">
-                <span>Design Principles</span>
-                <span>8% (1.1k views)</span>
-              </div>
-              <div className="w-full bg-zinc-100 h-2 rounded-sm overflow-hidden">
-                <div className="bg-zinc-300 h-full w-[8%]" />
-              </div>
-            </div>
-          </div>
+          ) : (
+            <p className="text-xs font-bold text-zinc-400 py-6">
+              No items yet — add recommendations to your shelf to see the breakdown.
+            </p>
+          )}
         </div>
 
-        {/* Right Column: Top Performing Items Leaderboard */}
+        {/* Right Column: Top Performing Items */}
         <div className="lg:col-span-5 bg-white border border-zinc-200 p-6 rounded-sm shadow-2xs space-y-4">
           <div>
             <h3 className="text-sm font-black text-zinc-950 flex items-center gap-2">
@@ -82,37 +113,29 @@ export default function AnalyticsTab() {
             </p>
           </div>
 
-          <div className="space-y-3 pt-2">
-            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-sm flex items-center justify-between">
-              <div>
-                <h4 className="text-xs font-extrabold text-zinc-900">Designing Data-Intensive Applications</h4>
-                <span className="text-[10px] text-zinc-500 font-semibold">412 Saves • 3.2k Views</span>
-              </div>
-              <span className="text-xs font-extrabold text-black bg-white border border-zinc-200 px-2 py-1 rounded-sm">
-                #1
-              </span>
+          {loading ? (
+            <p className="text-xs font-bold text-zinc-400 py-6">Loading leaderboard…</p>
+          ) : leaderboard && leaderboard.length > 0 ? (
+            <div className="space-y-3 pt-2">
+              {leaderboard.map((item, index) => (
+                <div key={item.id} className="p-3 bg-zinc-50 border border-zinc-200 rounded-sm flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-extrabold text-zinc-900 truncate">{item.title}</h4>
+                    <span className="text-[10px] text-zinc-500 font-semibold">
+                      {item.save_count} {item.save_count === 1 ? "Save" : "Saves"} • {item.view_count.toLocaleString()} Views
+                    </span>
+                  </div>
+                  <span className="text-xs font-extrabold text-black bg-white border border-zinc-200 px-2 py-1 rounded-sm shrink-0">
+                    #{index + 1}
+                  </span>
+                </div>
+              ))}
             </div>
-
-            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-sm flex items-center justify-between">
-              <div>
-                <h4 className="text-xs font-extrabold text-zinc-900">Choose Boring Technology</h4>
-                <span className="text-[10px] text-zinc-500 font-semibold">289 Saves • 2.1k Views</span>
-              </div>
-              <span className="text-xs font-extrabold text-black bg-white border border-zinc-200 px-2 py-1 rounded-sm">
-                #2
-              </span>
-            </div>
-
-            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-sm flex items-center justify-between">
-              <div>
-                <h4 className="text-xs font-extrabold text-zinc-900">Naval Ravikant (@naval)</h4>
-                <span className="text-[10px] text-zinc-500 font-semibold">245 Saves • 1.9k Views</span>
-              </div>
-              <span className="text-xs font-extrabold text-black bg-white border border-zinc-200 px-2 py-1 rounded-sm">
-                #3
-              </span>
-            </div>
-          </div>
+          ) : (
+            <p className="text-xs font-bold text-zinc-400 py-6">
+              No performance data yet — saves and views will appear here as people discover your shelf.
+            </p>
+          )}
         </div>
 
       </div>

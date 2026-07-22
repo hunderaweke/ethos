@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { X, ArrowLeft, CheckCircle, ShieldCheck, Sparkle, GoogleLogo } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { X, CheckCircle, ShieldCheck, GoogleLogo, WarningCircle } from "@phosphor-icons/react";
+import { googleAuth, ApiError } from "../utils/api";
+import { GOOGLE_CLIENT_ID, loadGoogleIdentityScript, type GoogleCredentialResponse } from "../utils/googleIdentity";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -8,16 +10,36 @@ interface AuthModalProps {
   initialMode?: "login" | "signup";
 }
 
-export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "signup" }: AuthModalProps) {
-  const [mode, setMode] = useState<"login" | "signup">(initialMode);
+// Login and signup are the same Google flow server-side (POST /auth/google
+// upserts either way), so there's no separate signup/login UI here — one button.
+export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
-  if (!isOpen) return null;
-
-  const handleGoogleAuth = () => {
+  const handleCredential = (idToken: string) => {
+    setError(null);
     setIsLoading(true);
-    // Simulate Google SSO authentication flow
+    googleAuth(idToken)
+      .then(() => {
+        setIsLoading(false);
+        setIsSuccess(true);
+        setTimeout(() => {
+          setIsSuccess(false);
+          onSuccess();
+          onClose();
+        }, 900);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        setError(err instanceof ApiError ? err.message : "Couldn't sign you in — please try again.");
+      });
+  };
+
+  // Simulated flow — only used when no GOOGLE_CLIENT_ID is configured (local dev without credentials).
+  const handleSimulatedAuth = () => {
+    setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
       setIsSuccess(true);
@@ -29,18 +51,48 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "s
     }, 1200);
   };
 
+  useEffect(() => {
+    if (!isOpen || !GOOGLE_CLIENT_ID || !buttonRef.current) return;
+
+    let cancelled = false;
+    loadGoogleIdentityScript()
+      .then(() => {
+        if (cancelled || !window.google || !buttonRef.current) return;
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (res: GoogleCredentialResponse) => handleCredential(res.credential),
+        });
+        buttonRef.current.innerHTML = "";
+        window.google.accounts.id.renderButton(buttonRef.current, {
+          theme: "outline",
+          size: "large",
+          width: 320,
+          shape: "rectangular",
+          text: "continue_with",
+        });
+      })
+      .catch(() => setError("Couldn't load Google Sign-In — please try again."));
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
   return (
-    <div 
+    <div
       onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in cursor-pointer"
     >
-      <div 
+      <div
         onClick={(e) => e.stopPropagation()}
         className="bg-white border border-zinc-200 w-full max-w-md rounded-sm shadow-2xl overflow-hidden relative group cursor-default"
       >
-        
+
         {/* Minimal Blueprint grid pattern overlay */}
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none select-none"
           style={{
             backgroundImage: `
@@ -65,55 +117,38 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "s
         </button>
 
         <div className="p-8 relative z-10 space-y-6 text-center">
-          
+
           {/* Brand Logo & Header */}
           <div className="space-y-2">
-            
+
             <h2 className="text-2xl font-extrabold text-zinc-950 font-sans tracking-tight">
-              {mode === "signup" ? "Create your mind-shelf" : "Welcome back to"}
+              Continue to
               <span className="block text-black">
                 blueprint<span className="text-zinc-400 font-medium">.id</span>
               </span>
             </h2>
-            
-            <p className="text-xs text-zinc-500 font-medium max-w-xs mx-auto">
-              {mode === "signup"
-                ? "Join curators, engineers, and designers sharing their intellectual graph."
-                : "Sign in with Google to manage your handle, shelf items, and analytics."}
-            </p>
-          </div>
 
-          {/* Mode Switch Tabs */}
-          <div className="grid grid-cols-2 p-1 bg-zinc-100 border border-zinc-200/80 rounded-sm text-xs font-bold">
-            <button
-              onClick={() => setMode("signup")}
-              className={`py-1.5 rounded-sm transition-all cursor-pointer ${
-                mode === "signup" ? "bg-black text-white shadow-2xs" : "text-zinc-600 hover:text-black"
-              }`}
-            >
-              Sign Up
-            </button>
-            <button
-              onClick={() => setMode("login")}
-              className={`py-1.5 rounded-sm transition-all cursor-pointer ${
-                mode === "login" ? "bg-black text-white shadow-2xs" : "text-zinc-600 hover:text-black"
-              }`}
-            >
-              Log In
-            </button>
+            <p className="text-xs text-zinc-500 font-medium max-w-xs mx-auto">
+              One account for everything — curate your shelf, or just browse what others have shared.
+            </p>
           </div>
 
           {/* Single Sign-On Action Area */}
           <div className="space-y-3 pt-2">
-            
+
             {isSuccess ? (
               <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-sm text-emerald-800 flex items-center justify-center gap-2 animate-fade-in">
                 <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
                 <span className="text-xs font-extrabold">Authenticated! Opening Dashboard...</span>
               </div>
+            ) : GOOGLE_CLIENT_ID ? (
+              <div className="flex flex-col items-center gap-2">
+                <div ref={buttonRef} className="min-h-[44px] flex items-center justify-center" />
+                {isLoading && <div className="h-4 w-4 border-2 border-zinc-400 border-t-black rounded-full animate-spin" />}
+              </div>
             ) : (
               <button
-                onClick={handleGoogleAuth}
+                onClick={handleSimulatedAuth}
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-3 bg-white border border-zinc-300 hover:border-black hover:bg-slate-50 text-slate-900 font-bold text-xs py-3 px-4 rounded-sm transition-all shadow-2xs cursor-pointer disabled:opacity-50 group/btn"
               >
@@ -122,8 +157,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "s
                 ) : (
                   <GoogleLogo className="h-5 w-5 shrink-0 text-black transition-transform group-hover/btn:scale-110" weight="bold" />
                 )}
-                <span>{isLoading ? "Authenticating with Google..." : `Continue with Google to ${mode === "signup" ? "Sign Up" : "Log In"}`}</span>
+                <span>{isLoading ? "Authenticating with Google..." : "Continue with Google"}</span>
               </button>
+            )}
+
+            {error && (
+              <div className="flex items-center justify-center gap-1.5 text-[10px] text-rose-600 font-bold">
+                <WarningCircle className="h-3.5 w-3.5" />
+                <span>{error}</span>
+              </div>
             )}
 
             <div className="flex items-center justify-center gap-1.5 text-[10px] text-zinc-400 font-semibold pt-1">

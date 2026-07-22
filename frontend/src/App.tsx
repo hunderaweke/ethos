@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import AboutSection from "./components/AboutSection";
@@ -7,15 +9,99 @@ import Footer from "./components/Footer";
 import HandlePage from "./components/HandlePage";
 import Dashboard from "./components/Dashboard";
 import AuthModal from "./components/AuthModal";
+import { getMe, logout as apiLogout } from "./utils/api";
+
+// Logged-out visitors previewing "Mind-Shelf" land on this demo profile.
+const DEMO_HANDLE = "technomad23";
+
+function Landing({
+  onViewProfile,
+  onViewDashboard,
+  onOpenAuth,
+  onGoHome,
+  isLoggedIn,
+  onLogout,
+}: {
+  onViewProfile: () => void;
+  onViewDashboard: () => void;
+  onOpenAuth: (mode?: "login" | "signup") => void;
+  onGoHome: () => void;
+  isLoggedIn: boolean;
+  onLogout: () => void;
+}) {
+  return (
+    <>
+      <Navbar
+        onViewProfile={onViewProfile}
+        onViewDashboard={onViewDashboard}
+        onOpenAuth={onOpenAuth}
+        isLoggedIn={isLoggedIn}
+        onLogout={onLogout}
+      />
+      <main>
+        <Hero
+          onViewProfile={onViewProfile}
+          onViewDashboard={onViewDashboard}
+          onOpenAuth={onOpenAuth}
+        />
+        <AboutSection />
+        <ShareSection onViewProfile={onViewProfile} />
+      </main>
+      <Footer
+        onViewProfile={onViewProfile}
+        onViewDashboard={onViewDashboard}
+        onGoHome={onGoHome}
+        onOpenAuth={onOpenAuth}
+      />
+    </>
+  );
+}
+
+function RequireAuth({
+  ready,
+  isLoggedIn,
+  onNeedAuth,
+  children,
+}: {
+  ready: boolean;
+  isLoggedIn: boolean;
+  onNeedAuth: () => void;
+  children: ReactNode;
+}) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (ready && !isLoggedIn) {
+      onNeedAuth();
+      navigate("/", { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, isLoggedIn]);
+
+  if (!ready) return null;
+  return isLoggedIn ? <>{children}</> : null;
+}
 
 function App() {
-  const [currentView, setCurrentView] = useState<"landing" | "profile" | "dashboard">("landing");
+  const navigate = useNavigate();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [myHandle, setMyHandle] = useState<string | null>(null);
+
+  useEffect(() => {
+    getMe()
+      .then((me) => {
+        setIsLoggedIn(true);
+        setMyHandle(me.profile?.handle ?? null);
+      })
+      .catch(() => setIsLoggedIn(false))
+      .finally(() => setAuthChecked(true));
+  }, []);
 
   const handleShowProfile = () => {
-    setCurrentView("profile");
+    navigate(`/@${myHandle || DEMO_HANDLE}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -24,12 +110,12 @@ function App() {
       handleOpenAuth("login");
       return;
     }
-    setCurrentView("dashboard");
+    navigate("/dashboard");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleGoHome = () => {
-    setCurrentView("landing");
+    navigate("/");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -40,48 +126,56 @@ function App() {
 
   const handleAuthSuccess = () => {
     setIsLoggedIn(true);
-    setCurrentView("dashboard");
+    getMe().then((me) => setMyHandle(me.profile?.handle ?? null)).catch(() => {});
+    navigate("/dashboard");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLogout = () => {
+    apiLogout().catch(() => {});
     setIsLoggedIn(false);
-    setCurrentView("landing");
+    setMyHandle(null);
+    navigate("/");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
-      
-      {/* View Router */}
-      {currentView === "profile" ? (
-        <HandlePage onBack={handleGoHome} onViewDashboard={handleShowDashboard} onOpenAuth={handleOpenAuth} />
-      ) : currentView === "dashboard" ? (
-        <Dashboard onViewProfile={handleShowProfile} onGoHome={handleGoHome} onLogout={handleLogout} />
-      ) : (
-        <>
-          <Navbar 
-            onViewProfile={handleShowProfile} 
-            onViewDashboard={handleShowDashboard}
-            onOpenAuth={handleOpenAuth} 
-          />
-          <main>
-            <Hero 
-              onViewProfile={handleShowProfile} 
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Landing
+              onViewProfile={handleShowProfile}
               onViewDashboard={handleShowDashboard}
-              onOpenAuth={handleOpenAuth} 
+              onOpenAuth={handleOpenAuth}
+              onGoHome={handleGoHome}
+              isLoggedIn={isLoggedIn}
+              onLogout={handleLogout}
             />
-            <AboutSection />
-            <ShareSection onViewProfile={handleShowProfile} />
-          </main>
-          <Footer 
-            onViewProfile={handleShowProfile} 
-            onViewDashboard={handleShowDashboard} 
-            onGoHome={handleGoHome}
-            onOpenAuth={handleOpenAuth}
-          />
-        </>
-      )}
+          }
+        />
+        {/* react-router can't match a literal "@" glued directly before a param
+            (path="/@:handle" never matches) — route on a bare single segment
+            instead; HandlePage strips the "@" itself. */}
+        <Route
+          path="/:handle"
+          element={<HandlePage onBack={handleGoHome} />}
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth ready={authChecked} isLoggedIn={isLoggedIn} onNeedAuth={() => handleOpenAuth("login")}>
+              <Dashboard
+                onViewProfile={handleShowProfile}
+                onGoHome={handleGoHome}
+                onLogout={handleLogout}
+              />
+            </RequireAuth>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
 
       {/* Google Single Sign-On Auth Modal */}
       <AuthModal
@@ -90,7 +184,6 @@ function App() {
         onSuccess={handleAuthSuccess}
         initialMode={authMode}
       />
-
     </div>
   );
 }

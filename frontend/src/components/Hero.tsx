@@ -7,10 +7,25 @@ import {
   PaletteIcon,
   XLogoIcon,
   FlaskIcon,
+  InstagramLogo,
+  LinkedinLogo,
+  SpotifyLogo,
+  GithubLogo,
+  DiscordLogo,
+  FigmaLogo,
+  TwitchLogo,
+  TiktokLogo,
+  RedditLogo,
+  GoodreadsLogo,
+  MediumLogo,
+  TelegramLogo,
+  Newspaper,
 } from "@phosphor-icons/react";
-import * as PhosphorIcons from "@phosphor-icons/react";
+import type { Icon } from "@phosphor-icons/react";
 import { generateVibrantColor, getSocialMediaColor } from "../utils/color";
-import integrationsData from "../data/integrations.json";
+import { checkHandleAvailability } from "../utils/api";
+import { useHandleAvailability } from "../utils/useHandleAvailability";
+import HandleAvailabilityBadge, { handleStatusBorderClass } from "./HandleAvailabilityBadge";
 
 interface HeroProps {
   onViewProfile: () => void;
@@ -18,27 +33,61 @@ interface HeroProps {
   onOpenAuth?: (mode: "login" | "signup") => void;
 }
 
+// Purely decorative — a "curate from anywhere" strip, not a claim of
+// integration/auto-import capability (that feature doesn't exist).
+const PLATFORM_MARQUEE: { id: string; name: string; Icon: Icon }[] = [
+  { id: "youtube", name: "YouTube", Icon: YoutubeLogoIcon },
+  { id: "x", name: "X / Twitter", Icon: XLogoIcon },
+  { id: "telegram", name: "Telegram", Icon: TelegramLogo },
+  { id: "instagram", name: "Instagram", Icon: InstagramLogo },
+  { id: "linkedin", name: "LinkedIn", Icon: LinkedinLogo },
+  { id: "spotify", name: "Spotify", Icon: SpotifyLogo },
+  { id: "github", name: "GitHub", Icon: GithubLogo },
+  { id: "discord", name: "Discord", Icon: DiscordLogo },
+  { id: "figma", name: "Figma", Icon: FigmaLogo },
+  { id: "twitch", name: "Twitch", Icon: TwitchLogo },
+  { id: "tiktok", name: "TikTok", Icon: TiktokLogo },
+  { id: "reddit", name: "Reddit", Icon: RedditLogo },
+  { id: "goodreads", name: "Goodreads", Icon: GoodreadsLogo },
+  { id: "medium", name: "Medium", Icon: MediumLogo },
+  { id: "substack", name: "Substack", Icon: Newspaper },
+];
+
 export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: HeroProps) {
   const [username, setUsername] = useState("");
   const [isClaimed, setIsClaimed] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+  const availability = useHandleAvailability(username);
 
-  const handleClaim = (e: React.FormEvent) => {
+  const handleClaim = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim()) {
-      setIsClaimed(true);
-      setTimeout(() => {
-        setIsClaimed(false);
-        if (onOpenAuth) {
-          onOpenAuth("signup");
-        } else if (onViewDashboard) {
-          onViewDashboard();
-        } else {
-          onViewProfile();
-        }
-      }, 800);
+    if (!username.trim()) return;
+
+    // Re-check right before proceeding — the live badge can go stale
+    // (race with someone else claiming it, or debounce still catching up).
+    setIsChecking(true);
+    try {
+      const { available } = await checkHandleAvailability(username);
+      if (!available) return;
+    } catch {
+      return;
+    } finally {
+      setIsChecking(false);
     }
+
+    setIsClaimed(true);
+    setTimeout(() => {
+      setIsClaimed(false);
+      if (onOpenAuth) {
+        onOpenAuth("signup");
+      } else if (onViewDashboard) {
+        onViewDashboard();
+      } else {
+        onViewProfile();
+      }
+    }, 800);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -48,9 +97,6 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
       y: e.clientY - rect.top,
     });
   };
-
-  // Duplicate list to ensure seamless infinite looping marquee
-  const marqueeItems = [...integrationsData, ...integrationsData];
 
   return (
     <section
@@ -113,7 +159,7 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
           {/* Claim Username Input */}
           <form
             onSubmit={handleClaim}
-            className="relative max-w-lg mx-auto p-1.5 rounded-sm bg-white shadow-md border border-zinc-300 flex items-center group transition-all focus-within:ring-2 focus-within:ring-zinc-900/10 focus-within:border-black"
+            className={`relative max-w-lg mx-auto p-1.5 rounded-sm bg-white shadow-md border flex items-center group transition-colors focus-within:ring-2 ${handleStatusBorderClass(availability)}`}
           >
             <div className="flex items-center pl-4 text-slate-400 font-medium">
               <span className="text-zinc-600 font-bold select-none text-base">
@@ -133,7 +179,8 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
             />
             <button
               type="submit"
-              className="rounded-sm bg-black px-6 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 shadow-xs cursor-pointer"
+              disabled={isChecking || availability === "taken" || availability === "invalid" || availability === "checking"}
+              className="rounded-sm bg-black px-6 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 shadow-xs cursor-pointer disabled:opacity-50"
             >
               {isClaimed ? (
                 <>
@@ -148,6 +195,12 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
               )}
             </button>
           </form>
+
+          {username && !isClaimed && (
+            <div className="mt-2 flex justify-center">
+              <HandleAvailabilityBadge status={availability} />
+            </div>
+          )}
 
           {/* Helper Micro-copy */}
           <p className="mt-4 text-xs font-semibold text-slate-400 tracking-wide">
@@ -315,37 +368,31 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
         </div>
       </div>
 
-      {/* Sliding Marquee / Supported Integrations */}
-      <div className="absolute bottom-0 inset-x-0 border-zinc-200 py-5  overflow-hidden">
-        {/* Left/Right Fading Masks for Marquee */}
+      {/* Sliding Marquee — decorative "curate from anywhere" strip, not an integration list */}
+      <div className="absolute bottom-0 inset-x-0 border-zinc-200 py-5 overflow-hidden">
         <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
         <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
-        
+
         <div className="relative w-full flex items-center">
           <div className="flex gap-4 animate-marquee whitespace-nowrap">
-            {marqueeItems.map((item, index) => {
-              const IconComponent = (PhosphorIcons as any)[item.icon] || PhosphorIcons.LinkIcon;
-              return (
-                <div
-                  key={index}
-                  className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-sm border text-xs font-bold transition-all duration-300 select-none mx-2 cursor-pointer"
-                  style={{
-                    color: getSocialMediaColor(item.id, 1),
-                    backgroundColor: getSocialMediaColor(item.id, 0.12),
-                    borderColor: getSocialMediaColor(item.id, 0.18)
-                  }}
-                >
-                  <IconComponent
-                    className="h-4.5 w-4.5"
-                    color={getSocialMediaColor(item.id, 1)}
-                  />
-                  <span className="font-bold">{item.name}</span>
-                </div>
-              );
-            })}
+            {[...PLATFORM_MARQUEE, ...PLATFORM_MARQUEE].map((item, index) => (
+              <div
+                key={`${item.id}-${index}`}
+                className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-sm border text-xs font-bold transition-all duration-300 select-none mx-2 cursor-default"
+                style={{
+                  color: getSocialMediaColor(item.id, 1),
+                  backgroundColor: getSocialMediaColor(item.id, 0.12),
+                  borderColor: getSocialMediaColor(item.id, 0.18)
+                }}
+              >
+                <item.Icon className="h-4.5 w-4.5" color={getSocialMediaColor(item.id, 1)} />
+                <span className="font-bold">{item.name}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+
     </section>
   );
 }
