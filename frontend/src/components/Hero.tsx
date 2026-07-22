@@ -26,7 +26,6 @@ import { generateVibrantColor, getSocialMediaColor } from "../utils/color";
 import { checkHandleAvailability } from "../utils/api";
 import { useHandleAvailability } from "../utils/useHandleAvailability";
 import HandleAvailabilityBadge, { handleStatusBorderClass } from "./HandleAvailabilityBadge";
-import { HeroBlueprintIllustration } from "./illustrations/Illustrations";
 
 interface HeroProps {
   onViewProfile: () => void;
@@ -207,18 +206,6 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
           <p className="mt-4 text-xs font-semibold text-slate-400 tracking-wide">
             Free forever • Instant setup • No code required
           </p>
-
-          {/* Hero Architectural Blueprint Vector Graphic */}
-          <div className="mt-10 max-w-2xl mx-auto rounded-sm border border-zinc-200/90 shadow-md bg-white p-3 overflow-hidden transition-transform duration-500 hover:shadow-lg">
-            <div className="flex items-center justify-between px-3 py-1.5 border-b border-zinc-100 mb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-              <span>Mind-Shelf System Blueprint</span>
-              <span className="text-emerald-600 font-extrabold flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Architecture
-              </span>
-            </div>
-            <HeroBlueprintIllustration className="w-full h-auto" />
-          </div>
         </div>
       </div>
 
