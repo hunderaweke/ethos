@@ -7,6 +7,7 @@ import {
   type LeaderboardItem,
 } from "../../utils/api";
 import { getSocialMediaColor } from "../../utils/color";
+import { EmptyAnalyticsIllustration } from "../illustrations/Illustrations";
 
 const TYPE_LABELS: Record<string, string> = {
   book: "Books & Literature",
@@ -94,9 +95,12 @@ export default function AnalyticsTab() {
               })}
             </div>
           ) : (
-            <p className="text-xs font-semibold text-zinc-400 py-6">
-              No items yet — add recommendations to your shelf to see the breakdown.
-            </p>
+            <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
+              <EmptyAnalyticsIllustration className="w-40 h-40" />
+              <p className="text-xs font-bold text-zinc-500 max-w-xs">
+                No items yet — add recommendations to your shelf to view your influence category breakdown.
+              </p>
+            </div>
           )}
         </div>
 
@@ -135,9 +139,11 @@ export default function AnalyticsTab() {
               ))}
             </div>
           ) : (
-            <p className="text-xs font-semibold text-zinc-400 py-6">
-              No performance data yet — saves and views will appear here as people discover your shelf.
-            </p>
+            <div className="py-8 flex flex-col items-center justify-center text-center space-y-2">
+              <p className="text-xs font-bold text-zinc-400">
+                No performance data yet — saves and views will populate as visitors explore your handle page.
+              </p>
+            </div>
           )}
         </div>
 

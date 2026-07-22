@@ -22,6 +22,7 @@ import type { CurationItem, ResourceKind } from "../../types";
 import { generateVibrantColor, getSocialMediaColor } from "../../utils/color";
 import ResourceKindIcon, { RESOURCE_KIND_LABELS, ResourceKindBadge } from "../ResourceKindIcon";
 import Pagination from "../Pagination";
+import { EmptyShelfIllustration } from "../illustrations/Illustrations";
 
 interface ManageShelfTabProps {
   filteredItems: CurationItem[];
@@ -484,8 +485,19 @@ export default function ManageShelfTab({
             );
           })
         ) : (
-          <div className="p-8 text-center bg-zinc-50 text-zinc-500 text-xs font-bold">
-            No curation items match your filter criteria.
+          <div className="p-10 text-center bg-zinc-50 flex flex-col items-center justify-center gap-3">
+            <EmptyShelfIllustration className="w-44 h-36" />
+            <div>
+              <h4 className="text-sm font-black text-zinc-900">Your Shelf is Empty</h4>
+              <p className="text-xs text-zinc-500 font-semibold mt-0.5">No curation items match your current filter settings.</p>
+            </div>
+            <button
+              onClick={onOpenAddModal}
+              className="mt-1 inline-flex items-center gap-1.5 px-4 py-2 rounded-sm bg-black text-white text-xs font-bold hover:bg-zinc-800 transition-colors cursor-pointer shadow-xs"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add First Recommendation
+            </button>
           </div>
         )}
       </div>

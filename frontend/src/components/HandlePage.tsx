@@ -11,6 +11,8 @@ import { getPublicProfile, getPublicItems, followProfile, unfollowProfile, saveI
 import ResourceKindIcon, { RESOURCE_KIND_LABELS } from "./ResourceKindIcon";
 import { useToast } from "./ToastContext";
 
+import { NotFoundIllustration, EmptyShelfIllustration } from "./illustrations/Illustrations";
+
 interface HandlePageProps {
   onBack: () => void;
 }
@@ -194,16 +196,21 @@ export default function HandlePage({ onBack }: HandlePageProps) {
   if (notFound || !profile) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-md w-full bg-white border border-zinc-200 rounded-sm p-8 shadow-sm">
-          <h2 className="text-xl font-bold text-zinc-900 mb-2">Shelf Not Found</h2>
-          <p className="text-sm text-zinc-600 mb-6">
-            This handle doesn't exist or hasn't been set up yet.
-          </p>
+        <div className="max-w-md w-full bg-white border border-zinc-200 rounded-sm p-8 shadow-sm space-y-5">
+          <div className="flex justify-center">
+            <NotFoundIllustration className="w-64 h-48" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-zinc-950">Mind-Shelf Not Located</h2>
+            <p className="text-xs text-zinc-500 font-medium mt-1">
+              The handle <strong className="text-zinc-800">@{handle}</strong> does not exist in our blueprint matrix or hasn't been claimed yet.
+            </p>
+          </div>
           <button 
             onClick={onBack} 
-            className="w-full py-3 bg-zinc-900 text-white font-bold text-sm rounded-sm hover:bg-zinc-800 transition-all cursor-pointer active:scale-95 shadow-sm"
+            className="w-full py-3 bg-zinc-950 text-white font-bold text-xs rounded-sm hover:bg-zinc-800 transition-all cursor-pointer active:scale-95 shadow-sm"
           >
-            Back to Home
+            Back to Discovery Home
           </button>
         </div>
       </div>
@@ -562,13 +569,17 @@ export default function HandlePage({ onBack }: HandlePageProps) {
               </div>
             </div>
           ) : (
-            <div className="bg-white border border-zinc-200 p-12 text-center rounded-sm">
-              <p className="text-zinc-500 text-xs font-bold tracking-wide">No curation items match your filter criteria.</p>
+            <div className="bg-white border border-zinc-200 p-10 sm:p-12 text-center rounded-sm space-y-4 flex flex-col items-center">
+              <EmptyShelfIllustration className="w-48 h-40" />
+              <div>
+                <h3 className="text-sm font-black text-zinc-900">No Mind-Shelf Items Found</h3>
+                <p className="text-zinc-500 text-xs font-medium mt-1">No recommendations match your active filter criteria.</p>
+              </div>
               <button
                 onClick={() => { setActiveCategory("all"); setActiveKind("all"); setActiveTag("all"); setSearchQuery(""); setPage(1); }}
-                className="mt-3 text-xs font-bold text-black underline cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold text-xs rounded-sm transition-colors cursor-pointer border border-zinc-200"
               >
-                Reset Filters
+                Reset All Filters
               </button>
             </div>
           )}
