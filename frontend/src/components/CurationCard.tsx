@@ -10,26 +10,9 @@ import {
 } from "@phosphor-icons/react";
 import { getSocialMediaColor, generateVibrantColor } from "../utils/color";
 import { getResourceLogo } from "../utils/logo";
+import type { CurationItem } from "../types";
 
-export interface CurationItem {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  impact: string;
-  tags: string[];
-  link: string;
-  size?: string;
-  image?: string;
-  author?: string;
-  creator?: string;
-  host?: string;
-  handle?: string;
-  subscribers?: string;
-  episodes?: string;
-  followers?: string;
-  readTime?: string;
-}
+export type { CurationItem };
 
 export interface CurationCardProps {
   item: CurationItem;
