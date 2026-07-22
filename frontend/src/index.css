@@ -14,6 +14,7 @@
   --animate-float-medium: float-medium 6s ease-in-out infinite;
   --animate-float-fast: float-fast 4s ease-in-out infinite;
   --animate-marquee: marquee 35s linear infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
 }
 
 @keyframes float-slow {
@@ -36,6 +37,20 @@
   100% { transform: translateX(-50%); }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* Custom Utilities */
 .gradient-text {
   color: #000000;
@@ -44,12 +59,12 @@
 .premium-card {
   background: #ffffff;
   border: 1px solid #e4e4e7;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .premium-card:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
   border-color: #09090b;
 }
 
@@ -101,3 +116,8 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f4f4f5 25%, #e4e4e7 37%, #f4f4f5 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}

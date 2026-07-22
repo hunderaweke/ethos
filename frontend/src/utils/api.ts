@@ -57,6 +57,15 @@ export interface ApiItem {
   click_count: number;
 }
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+  has_more: boolean;
+}
+
 class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -79,8 +88,6 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   return (await res.json()) as T;
 }
 
-// No Content-Type header here — the browser sets multipart/form-data with the
-// correct boundary itself; overriding it (as apiFetch does for JSON) breaks upload parsing.
 async function apiUpload<T>(path: string, file: File): Promise<T> {
   const formData = new FormData();
   formData.append("file", file);
@@ -104,13 +111,15 @@ export function getPublicProfile(handle: string): Promise<ApiProfile> {
 
 export function getPublicItems(
   handle: string,
-  filters: { type?: string; kind?: string; tag?: string; q?: string } = {}
-): Promise<ApiItem[]> {
+  filters: { type?: string; kind?: string; tag?: string; q?: string; page?: number; limit?: number } = {}
+): Promise<PaginatedResponse<ApiItem>> {
   const params = new URLSearchParams();
   if (filters.type && filters.type !== "all") params.set("type", filters.type);
   if (filters.kind && filters.kind !== "all") params.set("kind", filters.kind);
   if (filters.tag && filters.tag !== "all") params.set("tag", filters.tag);
   if (filters.q) params.set("q", filters.q);
+  if (filters.page) params.set("page", String(filters.page));
+  if (filters.limit) params.set("limit", String(filters.limit));
   const qs = params.toString();
   return apiFetch(`/profiles/${encodeURIComponent(handle)}/items${qs ? `?${qs}` : ""}`);
 }
@@ -150,12 +159,16 @@ export function logout(): Promise<void> {
   return apiFetch(`/auth/logout`, { method: "POST" });
 }
 
-export function getMyItems(filters: { type?: string; kind?: string; tag?: string; q?: string } = {}): Promise<ApiItem[]> {
+export function getMyItems(
+  filters: { type?: string; kind?: string; tag?: string; q?: string; page?: number; limit?: number } = {}
+): Promise<PaginatedResponse<ApiItem>> {
   const params = new URLSearchParams();
   if (filters.type && filters.type !== "all") params.set("type", filters.type);
   if (filters.kind && filters.kind !== "all") params.set("kind", filters.kind);
   if (filters.tag && filters.tag !== "all") params.set("tag", filters.tag);
   if (filters.q) params.set("q", filters.q);
+  if (filters.page) params.set("page", String(filters.page));
+  if (filters.limit) params.set("limit", String(filters.limit));
   const qs = params.toString();
   return apiFetch(`/items/me${qs ? `?${qs}` : ""}`);
 }
@@ -225,8 +238,6 @@ export function createProfile(handle: string, displayName: string): Promise<ApiP
   });
 }
 
-// --- Analytics (real counters from the backend, no more hardcoded numbers) ---
-
 export interface AnalyticsSummary {
   total_shelf_views: number;
   community_saves: number;
@@ -259,10 +270,6 @@ export function getCategoryBreakdown(): Promise<CategoryBreakdown[]> {
 export function getLeaderboard(limit = 10): Promise<LeaderboardItem[]> {
   return apiFetch(`/analytics/me/leaderboard?limit=${limit}`);
 }
-
-// --- Shape adapters between the API's snake_case contract and the
-// frontend's pre-existing CurationItem/HandleSettings types (types/index.ts),
-// so components built against the mock data don't need to change. ---
 
 export function toCurationItem(item: ApiItem): import("../types").CurationItem {
   const metadata = item.metadata || {};

@@ -10,6 +10,7 @@ import HandlePage from "./components/HandlePage";
 import Dashboard from "./components/Dashboard";
 import AuthModal from "./components/AuthModal";
 import { getMe, logout as apiLogout } from "./utils/api";
+import { ToastProvider } from "./components/ToastContext";
 
 // Logged-out visitors previewing "Mind-Shelf" land on this demo profile.
 const DEMO_HANDLE = "technomad23";
@@ -140,51 +141,53 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Landing
-              onViewProfile={handleShowProfile}
-              onViewDashboard={handleShowDashboard}
-              onOpenAuth={handleOpenAuth}
-              onGoHome={handleGoHome}
-              isLoggedIn={isLoggedIn}
-              onLogout={handleLogout}
-            />
-          }
-        />
-        {/* react-router can't match a literal "@" glued directly before a param
-            (path="/@:handle" never matches) — route on a bare single segment
-            instead; HandlePage strips the "@" itself. */}
-        <Route
-          path="/:handle"
-          element={<HandlePage onBack={handleGoHome} />}
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <RequireAuth ready={authChecked} isLoggedIn={isLoggedIn} onNeedAuth={() => handleOpenAuth("login")}>
-              <Dashboard
+    <ToastProvider>
+      <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans flex flex-col">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Landing
                 onViewProfile={handleShowProfile}
+                onViewDashboard={handleShowDashboard}
+                onOpenAuth={handleOpenAuth}
                 onGoHome={handleGoHome}
+                isLoggedIn={isLoggedIn}
                 onLogout={handleLogout}
               />
-            </RequireAuth>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+            }
+          />
+          {/* react-router can't match a literal "@" glued directly before a param
+              (path="/@:handle" never matches) — route on a bare single segment
+              instead; HandlePage strips the "@" itself. */}
+          <Route
+            path="/:handle"
+            element={<HandlePage onBack={handleGoHome} />}
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth ready={authChecked} isLoggedIn={isLoggedIn} onNeedAuth={() => handleOpenAuth("login")}>
+                <Dashboard
+                  onViewProfile={handleShowProfile}
+                  onGoHome={handleGoHome}
+                  onLogout={handleLogout}
+                />
+              </RequireAuth>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
 
-      {/* Google Single Sign-On Auth Modal */}
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onSuccess={handleAuthSuccess}
-        initialMode={authMode}
-      />
-    </div>
+        {/* Google Single Sign-On Auth Modal */}
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onSuccess={handleAuthSuccess}
+          initialMode={authMode}
+        />
+      </div>
+    </ToastProvider>
   );
 }
 
