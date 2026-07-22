@@ -6,9 +6,12 @@ import ShareSection from "./components/ShareSection";
 import Footer from "./components/Footer";
 import HandlePage from "./components/HandlePage";
 import Dashboard from "./components/Dashboard";
+import AuthModal from "./components/AuthModal";
 
 function App() {
   const [currentView, setCurrentView] = useState<"landing" | "profile" | "dashboard">("landing");
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
 
   const handleShowProfile = () => {
     setCurrentView("profile");
@@ -25,23 +28,57 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (currentView === "profile") {
-    return <HandlePage onBack={handleGoHome} onViewDashboard={handleShowDashboard} />;
-  }
+  const handleOpenAuth = (mode: "login" | "signup" = "signup") => {
+    setAuthMode(mode);
+    setIsAuthOpen(true);
+  };
 
-  if (currentView === "dashboard") {
-    return <Dashboard onViewProfile={handleShowProfile} onGoHome={handleGoHome} />;
-  }
+  const handleAuthSuccess = () => {
+    setCurrentView("dashboard");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
-      <Navbar onViewProfile={handleShowProfile} onViewDashboard={handleShowDashboard} />
-      <main>
-        <Hero onViewProfile={handleShowProfile} onViewDashboard={handleShowDashboard} />
-        <AboutSection />
-        <ShareSection onViewProfile={handleShowProfile} />
-      </main>
-      <Footer onViewProfile={handleShowProfile} onViewDashboard={handleShowDashboard} onGoHome={handleGoHome} />
+      
+      {/* View Router */}
+      {currentView === "profile" ? (
+        <HandlePage onBack={handleGoHome} onViewDashboard={handleShowDashboard} onOpenAuth={handleOpenAuth} />
+      ) : currentView === "dashboard" ? (
+        <Dashboard onViewProfile={handleShowProfile} onGoHome={handleGoHome} />
+      ) : (
+        <>
+          <Navbar 
+            onViewProfile={handleShowProfile} 
+            onViewDashboard={handleShowDashboard}
+            onOpenAuth={handleOpenAuth} 
+          />
+          <main>
+            <Hero 
+              onViewProfile={handleShowProfile} 
+              onViewDashboard={handleShowDashboard}
+              onOpenAuth={handleOpenAuth} 
+            />
+            <AboutSection />
+            <ShareSection onViewProfile={handleShowProfile} />
+          </main>
+          <Footer 
+            onViewProfile={handleShowProfile} 
+            onViewDashboard={handleShowDashboard} 
+            onGoHome={handleGoHome}
+            onOpenAuth={handleOpenAuth}
+          />
+        </>
+      )}
+
+      {/* Google Single Sign-On Auth Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onSuccess={handleAuthSuccess}
+        initialMode={authMode}
+      />
+
     </div>
   );
 }
