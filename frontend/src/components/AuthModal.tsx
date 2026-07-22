@@ -10,8 +10,6 @@ interface AuthModalProps {
   initialMode?: "login" | "signup";
 }
 
-// Login and signup are the same Google flow server-side (POST /auth/google
-// upserts either way), so there's no separate signup/login UI here — one button.
 export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -37,7 +35,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       });
   };
 
-  // Simulated flow — only used when no GOOGLE_CLIENT_ID is configured (local dev without credentials).
   const handleSimulatedAuth = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -50,6 +47,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       }, 900);
     }, 1200);
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!isOpen || !GOOGLE_CLIENT_ID || !buttonRef.current) return;
@@ -76,7 +82,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -84,14 +89,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in cursor-pointer"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in cursor-pointer"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border border-zinc-200 w-full max-w-md rounded-sm shadow-2xl overflow-hidden relative group cursor-default"
+        className="bg-white border border-zinc-200/90 w-full max-w-md rounded-sm shadow-2xl overflow-hidden relative group cursor-default max-h-[90vh] overflow-y-auto"
       >
 
-        {/* Minimal Blueprint grid pattern overlay */}
+        {/* Blueprint grid pattern overlay */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none select-none"
           style={{
@@ -110,17 +115,17 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             e.stopPropagation();
             onClose();
           }}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-black hover:bg-zinc-100 p-2 rounded-sm cursor-pointer z-30 transition-all pointer-events-auto"
+          className="absolute top-4 right-4 text-zinc-400 hover:text-black hover:bg-zinc-100 p-2.5 rounded-sm cursor-pointer z-30 transition-all pointer-events-auto min-w-[44px] min-h-[44px] flex items-center justify-center"
           title="Close modal"
+          aria-label="Close modal"
         >
-          <X className="h-4 w-4 text-zinc-600" />
+          <X className="h-5 w-5 text-zinc-600" />
         </button>
 
-        <div className="p-8 relative z-10 space-y-6 text-center">
+        <div className="p-6 sm:p-8 relative z-10 space-y-6 text-center">
 
-          {/* Brand Logo & Header */}
-          <div className="space-y-2">
-
+          {/* Brand Header */}
+          <div className="space-y-2 pt-2">
             <h2 className="text-2xl font-extrabold text-zinc-950 font-sans tracking-tight">
               Continue to
               <span className="block text-black">
@@ -137,7 +142,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           <div className="space-y-3 pt-2">
 
             {isSuccess ? (
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-sm text-emerald-800 flex items-center justify-center gap-2 animate-fade-in">
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-sm text-emerald-800 flex items-center justify-center gap-2 animate-in fade-in">
                 <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
                 <span className="text-xs font-extrabold">Authenticated! Opening Dashboard...</span>
               </div>
@@ -150,7 +155,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               <button
                 onClick={handleSimulatedAuth}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 bg-white border border-zinc-300 hover:border-black hover:bg-slate-50 text-slate-900 font-bold text-xs py-3 px-4 rounded-sm transition-all shadow-2xs cursor-pointer disabled:opacity-50 group/btn"
+                className="w-full flex items-center justify-center gap-3 bg-white border border-zinc-300 hover:border-black hover:bg-slate-50 text-slate-900 font-bold text-xs py-3.5 px-4 rounded-sm transition-all shadow-xs cursor-pointer disabled:opacity-50 min-h-[48px] active:scale-95 group/btn"
               >
                 {isLoading ? (
                   <div className="h-4 w-4 border-2 border-zinc-400 border-t-black rounded-full animate-spin" />

@@ -159,10 +159,10 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
           {/* Claim Username Input */}
           <form
             onSubmit={handleClaim}
-            className={`relative max-w-lg mx-auto p-1.5 rounded-sm bg-white shadow-md border flex items-center group transition-colors focus-within:ring-2 ${handleStatusBorderClass(availability)}`}
+            className={`relative max-w-lg mx-auto p-2 sm:p-1.5 rounded-sm bg-white shadow-md border flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 group transition-colors focus-within:ring-2 ${handleStatusBorderClass(availability)}`}
           >
-            <div className="flex items-center pl-4 text-slate-400 font-medium">
-              <span className="text-zinc-600 font-bold select-none text-base">
+            <div className="flex items-center pl-2 sm:pl-4 text-slate-400 font-medium">
+              <span className="text-zinc-600 font-bold select-none text-sm sm:text-base">
                 blueprint.id/@
               </span>
             </div>
@@ -180,7 +180,7 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
             <button
               type="submit"
               disabled={isChecking || availability === "taken" || availability === "invalid" || availability === "checking"}
-              className="rounded-sm bg-black px-6 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 shadow-xs cursor-pointer disabled:opacity-50"
+              className="rounded-sm bg-black px-6 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 shadow-xs cursor-pointer disabled:opacity-50 min-h-[44px]"
             >
               {isClaimed ? (
                 <>
@@ -190,7 +190,7 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
               ) : (
                 <>
                   Claim Handle
-                  <ArrowCircleUpRightIcon size={22} />
+                  <ArrowCircleUpRightIcon size={20} />
                 </>
               )}
             </button>

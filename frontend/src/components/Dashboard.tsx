@@ -67,6 +67,13 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
   const [filterKind, setFilterKind] = useState<string>("all");
   const [activeTag, setActiveTag] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Pagination state
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
+  const [total, setTotal] = useState<number>(0);
+  const [pages, setPages] = useState<number>(1);
+
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isKindOpen, setIsKindOpen] = useState(false);
   const [isTagOpen, setIsTagOpen] = useState(false);
@@ -104,51 +111,67 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
     setTimeout(() => setErrorMessage(null), 4500);
   };
 
-  // KPI counters live behind their own request; refreshed on load and after any
-  // mutation (add/delete/pin) so the cards stay in step with the shelf.
   const refreshSummary = useCallback(() => {
     getAnalyticsSummary()
       .then(setSummary)
       .catch(() => {});
   }, []);
 
-  const loadDashboard = useCallback((signal: { cancelled: boolean }) => {
-    setLoading(true);
-    setLoadError(false);
-
+  // Fetch Profile & Summary
+  useEffect(() => {
+    let cancelled = false;
     getMyProfile()
-      .then(async (profile) => {
-        const apiItems = await getMyItems();
-        if (signal.cancelled) return;
+      .then((profile) => {
+        if (cancelled) return;
         setNeedsProfile(false);
         setHandleSettings(toHandleSettings(profile));
         setOriginalHandle(profile.handle);
-        setItems(apiItems.map(toCurationItem));
-        setPinnedItemIds(
-          Object.fromEntries(apiItems.filter(i => i.is_pinned).map(i => [i.id, true]))
-        );
         refreshSummary();
       })
       .catch((err) => {
-        if (signal.cancelled) return;
-        if (err instanceof ApiError && err.status === 404) {
+        if (cancelled) return;
+        if (err instanceof ApiError && err.status === 401) {
+          onLogout?.();
+        } else if (err instanceof ApiError && err.status === 404) {
           setNeedsProfile(true);
         } else {
           setLoadError(true);
         }
-      })
-      .finally(() => {
-        if (!signal.cancelled) setLoading(false);
       });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshSummary, onLogout]);
+
+  // Fetch paginated items for my shelf
+  const fetchMyItems = useCallback(() => {
+    setLoading(true);
+    getMyItems({
+      type: filterCategory,
+      kind: filterKind,
+      tag: activeTag,
+      q: searchQuery,
+      page,
+      limit,
+    })
+      .then((res) => {
+        setItems(res.items.map(toCurationItem));
+        setTotal(res.total);
+        setPages(res.pages);
+        setPage(res.page);
+        setPinnedItemIds(
+          Object.fromEntries(res.items.filter(i => i.is_pinned).map(i => [i.id, true]))
+        );
+      })
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }, [filterCategory, filterKind, activeTag, searchQuery, page, limit]);
 
   useEffect(() => {
-    const signal = { cancelled: false };
-    loadDashboard(signal);
-    return () => {
-      signal.cancelled = true;
-    };
-  }, [loadDashboard]);
+    if (!needsProfile) {
+      fetchMyItems();
+    }
+  }, [needsProfile, fetchMyItems]);
 
   const allTags = useMemo(() => {
     const tagsSet = new Set<string>();
@@ -182,7 +205,7 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
     const { id, title } = itemToDelete;
     deleteItem(id)
       .then(() => {
-        setItems(prev => prev.filter(i => i.id !== id));
+        fetchMyItems();
         refreshSummary();
         triggerSuccess(`Successfully removed "${title}" from your shelf.`);
       })
@@ -190,9 +213,6 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
       .finally(() => setItemToDelete(null));
   };
 
-  // Avatar/banner crop-confirm only stages a File locally (see SettingsTab) —
-  // nothing hits the server until this single Save action, which uploads any
-  // pending image(s) then patches the text fields, atomically, in one confirm.
   const handleSaveProfile = async (draft: HandleSettings, avatarFile: File | null, bannerFile: File | null) => {
     try {
       let latestProfile;
@@ -287,32 +307,18 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
       .then((saved) => {
         const mapped = toCurationItem(saved);
         if (editingItem) {
-          setItems(prev => prev.map(i => (i.id === editingItem.id ? mapped : i)));
           triggerSuccess(`Updated "${mapped.title}" details.`);
         } else {
-          setItems(prev => [mapped, ...prev]);
           triggerSuccess(`Added "${mapped.title}" to your mind-shelf!`);
         }
+        fetchMyItems();
         refreshSummary();
         setIsAddModalOpen(false);
       })
       .catch(() => triggerError(editingItem ? "Couldn't update item — try again." : "Couldn't add item — try again."));
   };
 
-  const filteredItems = useMemo(() => {
-    return items.filter(item => {
-      const matchesCategory = filterCategory === "all" || item.type.toLowerCase() === filterCategory.toLowerCase();
-      const matchesKind = filterKind === "all" || item.resourceKind === filterKind;
-      const matchesTag = activeTag === "all" || item.tags.includes(activeTag);
-      const matchesSearch = searchQuery === "" ||
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesCategory && matchesKind && matchesTag && matchesSearch;
-    });
-  }, [items, filterCategory, filterKind, activeTag, searchQuery]);
-
-  if (loading) {
+  if (loading && items.length === 0 && !needsProfile && !loadError) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <p className="text-xs font-black tracking-wider text-zinc-400">Loading your shelf...</p>
@@ -334,7 +340,8 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
       <ClaimHandleForm
         onClaimed={async (handle, displayName) => {
           await createProfile(handle, displayName);
-          loadDashboard({ cancelled: false });
+          setNeedsProfile(false);
+          fetchMyItems();
         }}
         onGoHome={onGoHome}
       />
@@ -344,11 +351,11 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-black selection:text-white flex flex-col md:flex-row relative">
 
-      {/* SIDEBAR NAVIGATION (Desktop Fixed & Mobile Drawer) */}
+      {/* SIDEBAR NAVIGATION */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        itemsCount={items.length}
+        itemsCount={total}
         handleSettings={handleSettings}
         onViewProfile={onViewProfile}
         onGoHome={onGoHome}
@@ -369,28 +376,27 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
         />
 
         {/* Workspace Body Pane */}
-        <main className="px-5 sm:px-8 lg:px-10 py-6 sm:py-8 max-w-7xl mx-auto w-full space-y-6 flex-1">
+        <main className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 max-w-7xl mx-auto w-full space-y-8 flex-1">
 
           {/* KPI Summary Cards */}
           <KpiCards
             summary={summary}
-            totalItems={items.length}
+            totalItems={total}
             categoryCount={new Set(items.map(i => i.type)).size}
           />
 
           {/* TAB CONTENTS */}
           {activeTab === "items" && (
             <ManageShelfTab
-              items={items}
-              filteredItems={filteredItems}
+              filteredItems={items}
               filterCategory={filterCategory}
-              setFilterCategory={setFilterCategory}
+              setFilterCategory={(cat) => { setFilterCategory(cat); setPage(1); }}
               filterKind={filterKind}
-              setFilterKind={setFilterKind}
+              setFilterKind={(kind) => { setFilterKind(kind); setPage(1); }}
               activeTag={activeTag}
-              setActiveTag={setActiveTag}
+              setActiveTag={(tag) => { setActiveTag(tag); setPage(1); }}
               searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
+              setSearchQuery={(q) => { setSearchQuery(q); setPage(1); }}
               allTags={allTags}
               pinnedItemIds={pinnedItemIds}
               onTogglePin={togglePin}
@@ -403,6 +409,12 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
               setIsKindOpen={setIsKindOpen}
               isTagOpen={isTagOpen}
               setIsTagOpen={setIsTagOpen}
+              page={page}
+              pages={pages}
+              total={total}
+              limit={limit}
+              onPageChange={(p) => setPage(p)}
+              onLimitChange={(l) => { setLimit(l); setPage(1); }}
             />
           )}
 

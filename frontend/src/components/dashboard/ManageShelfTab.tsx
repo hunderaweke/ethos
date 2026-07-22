@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import {
   SlidersHorizontal,
   Plus,
@@ -21,9 +21,9 @@ import {
 import type { CurationItem, ResourceKind } from "../../types";
 import { generateVibrantColor, getSocialMediaColor } from "../../utils/color";
 import ResourceKindIcon, { RESOURCE_KIND_LABELS, ResourceKindBadge } from "../ResourceKindIcon";
+import Pagination from "../Pagination";
 
 interface ManageShelfTabProps {
-  items: CurationItem[];
   filteredItems: CurationItem[];
   filterCategory: string;
   setFilterCategory: (cat: string) => void;
@@ -45,6 +45,12 @@ interface ManageShelfTabProps {
   setIsKindOpen: (open: boolean) => void;
   isTagOpen: boolean;
   setIsTagOpen: (open: boolean) => void;
+  page: number;
+  pages: number;
+  total: number;
+  limit: number;
+  onPageChange: (newPage: number) => void;
+  onLimitChange: (newLimit: number) => void;
 }
 
 const KINDS: { id: string; label: string }[] = [
@@ -53,7 +59,6 @@ const KINDS: { id: string; label: string }[] = [
 ];
 
 export default function ManageShelfTab({
-  items,
   filteredItems,
   filterCategory,
   setFilterCategory,
@@ -74,7 +79,13 @@ export default function ManageShelfTab({
   isKindOpen,
   setIsKindOpen,
   isTagOpen,
-  setIsTagOpen
+  setIsTagOpen,
+  page,
+  pages,
+  total,
+  limit,
+  onPageChange,
+  onLimitChange,
 }: ManageShelfTabProps) {
   const categoryRef = useRef<HTMLDivElement>(null);
   const kindRef = useRef<HTMLDivElement>(null);
@@ -122,13 +133,13 @@ export default function ManageShelfTab({
   const hasActiveFilters = filterCategory !== "all" || filterKind !== "all" || activeTag !== "all" || searchQuery !== "";
 
   return (
-    <div className="bg-white border border-zinc-200 p-4 sm:p-6 rounded-sm shadow-2xs space-y-6 relative z-30">
+    <div className="bg-white border border-zinc-200 p-6 sm:p-8 lg:p-10 rounded-sm shadow-2xs space-y-6 relative z-30">
       
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200">
         <div>
-          <h2 className="text-base font-black text-zinc-950 flex items-center gap-2">
-            <SlidersHorizontal className="h-4.5 w-4.5 text-black" />
+          <h2 className="text-base sm:text-lg font-black text-zinc-950 flex items-center gap-2">
+            <SlidersHorizontal className="h-5 w-5 text-black" />
             Manage Mind-Shelf Items
           </h2>
           <p className="text-xs text-zinc-500 font-semibold mt-1">
@@ -139,21 +150,21 @@ export default function ManageShelfTab({
         <div className="flex items-center gap-2">
           <button
             onClick={onOpenAddModal}
-            className="inline-flex items-center gap-1.5 rounded-sm bg-black px-4 py-2 text-xs font-bold text-white hover:bg-zinc-900 transition-all cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 rounded-sm bg-black px-4 py-2 text-xs font-bold text-white hover:bg-zinc-800 transition-all cursor-pointer active:scale-95 shadow-xs"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-4 w-4 text-white" />
             <span>New Item</span>
           </button>
         </div>
       </div>
 
-      {/* Custom Styled Dropdowns (Category & Tag) + Search Bar */}
+      {/* Filters & Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         
         {/* Dropdown Filters Group */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           
-          {/* Category Custom Dropdown */}
+          {/* Category Dropdown */}
           <div className="relative" ref={categoryRef}>
             <button
               onClick={() => { setIsCategoryOpen(!isCategoryOpen); setIsKindOpen(false); setIsTagOpen(false); }}
@@ -171,42 +182,34 @@ export default function ManageShelfTab({
             </button>
 
             {isCategoryOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-48 bg-white border border-zinc-200 rounded-sm shadow-xl z-50 py-1.5 overflow-hidden animate-fade-in">
-                <div className="px-3 py-1.5 text-[10px] font-bold capitalize tracking-wider text-zinc-400 border-b border-zinc-100">
+              <div className="absolute top-full left-0 mt-1.5 w-48 bg-white border border-zinc-200 rounded-sm shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-1">
+                <div className="px-3.5 py-2 text-[10px] font-bold capitalize tracking-wider text-zinc-400 border-b border-zinc-100">
                   Filter category
                 </div>
                 <div className="max-h-56 overflow-y-auto py-1">
-                  {categories.map((cat) => {
-                    const count = cat.id === "all" 
-                      ? items.length 
-                      : items.filter(i => i.type.toLowerCase() === cat.id.toLowerCase()).length;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => {
-                          setFilterCategory(cat.id);
-                          setIsCategoryOpen(false);
-                        }}
-                        className={`w-full text-left px-3.5 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                          filterCategory === cat.id ? "bg-zinc-100 text-black font-bold" : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          {filterCategory === cat.id && <Check className="h-3.5 w-3.5 text-black" />}
-                          <span>{cat.label}</span>
-                        </span>
-                        <span className="text-[10px] text-zinc-400 font-bold bg-zinc-100 px-1.5 py-0.5 rounded-sm">
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        setFilterCategory(cat.id);
+                        setIsCategoryOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                        filterCategory === cat.id ? "bg-zinc-100 text-black font-bold" : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {filterCategory === cat.id && <Check className="h-3.5 w-3.5 text-black" />}
+                        <span>{cat.label}</span>
+                      </span>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Kind Custom Dropdown */}
+          {/* Kind Dropdown */}
           <div className="relative" ref={kindRef}>
             <button
               onClick={() => { setIsKindOpen(!isKindOpen); setIsCategoryOpen(false); setIsTagOpen(false); }}
@@ -228,43 +231,35 @@ export default function ManageShelfTab({
             </button>
 
             {isKindOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-48 bg-white border border-zinc-200 rounded-sm shadow-xl z-50 py-1.5 overflow-hidden animate-fade-in">
-                <div className="px-3 py-1.5 text-[10px] font-bold capitalize tracking-wider text-zinc-400 border-b border-zinc-100">
+              <div className="absolute top-full left-0 mt-1.5 w-48 bg-white border border-zinc-200 rounded-sm shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-1">
+                <div className="px-3.5 py-2 text-[10px] font-bold capitalize tracking-wider text-zinc-400 border-b border-zinc-100">
                   Filter by kind
                 </div>
                 <div className="max-h-56 overflow-y-auto py-1">
-                  {KINDS.map((kind) => {
-                    const count = kind.id === "all"
-                      ? items.length
-                      : items.filter(i => i.resourceKind === kind.id).length;
-                    return (
-                      <button
-                        key={kind.id}
-                        onClick={() => {
-                          setFilterKind(kind.id);
-                          setIsKindOpen(false);
-                        }}
-                        className={`w-full text-left px-3.5 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                          filterKind === kind.id ? "bg-zinc-100 text-black font-bold" : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          {filterKind === kind.id && <Check className="h-3.5 w-3.5 text-black" />}
-                          {kind.id !== "all" && <ResourceKindIcon kind={kind.id as ResourceKind} className="h-3.5 w-3.5 text-zinc-400" />}
-                          <span>{kind.label}</span>
-                        </span>
-                        <span className="text-[10px] text-zinc-400 font-bold bg-zinc-100 px-1.5 py-0.5 rounded-sm">
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
+                  {KINDS.map((kind) => (
+                    <button
+                      key={kind.id}
+                      onClick={() => {
+                        setFilterKind(kind.id);
+                        setIsKindOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                        filterKind === kind.id ? "bg-zinc-100 text-black font-bold" : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {filterKind === kind.id && <Check className="h-3.5 w-3.5 text-black" />}
+                        {kind.id !== "all" && <ResourceKindIcon kind={kind.id as ResourceKind} className="h-3.5 w-3.5 text-zinc-400" />}
+                        <span>{kind.label}</span>
+                      </span>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Tag Custom Dropdown */}
+          {/* Tag Dropdown */}
           <div className="relative" ref={tagRef}>
             <button
               onClick={() => { setIsTagOpen(!isTagOpen); setIsCategoryOpen(false); setIsKindOpen(false); }}
@@ -282,8 +277,8 @@ export default function ManageShelfTab({
             </button>
 
             {isTagOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-56 bg-white border border-zinc-200 rounded-sm shadow-xl z-50 py-1.5 overflow-hidden animate-fade-in">
-                <div className="px-3 py-1.5 text-[10px] font-bold capitalize tracking-wider text-zinc-400 border-b border-zinc-100 flex items-center justify-between">
+              <div className="absolute top-full left-0 mt-1.5 w-56 bg-white border border-zinc-200 rounded-sm shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-1">
+                <div className="px-3.5 py-2 text-[10px] font-bold capitalize tracking-wider text-zinc-400 border-b border-zinc-100 flex items-center justify-between">
                   <span>Filter by tag</span>
                   {activeTag !== "all" && (
                     <button 
@@ -300,7 +295,7 @@ export default function ManageShelfTab({
                       setActiveTag("all");
                       setIsTagOpen(false);
                     }}
-                    className={`w-full text-left px-3.5 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                    className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
                       activeTag === "all" ? "bg-zinc-100 text-black font-bold" : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
                     }`}
                   >
@@ -308,33 +303,24 @@ export default function ManageShelfTab({
                       {activeTag === "all" && <Check className="h-3.5 w-3.5 text-black" />}
                       <span>All Tags</span>
                     </span>
-                    <span className="text-[10px] text-zinc-400 font-bold bg-zinc-100 px-1.5 py-0.5 rounded-sm">
-                      {items.length}
-                    </span>
                   </button>
-                  {allTags.map((tag) => {
-                    const count = items.filter(i => i.tags.includes(tag)).length;
-                    return (
-                      <button
-                        key={tag}
-                        onClick={() => {
-                          setActiveTag(tag);
-                          setIsTagOpen(false);
-                        }}
-                        className={`w-full text-left px-3.5 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                          activeTag === tag ? "bg-zinc-100 text-black font-bold" : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
-                        }`}
-                      >
-                        <span className="flex items-center gap-2 truncate">
-                          {activeTag === tag && <Check className="h-3.5 w-3.5 text-black shrink-0" />}
-                          <span className="truncate">{tag}</span>
-                        </span>
-                        <span className="text-[10px] text-zinc-400 font-bold bg-zinc-100 px-1.5 py-0.5 rounded-sm shrink-0 ml-2">
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
+                  {allTags.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => {
+                        setActiveTag(tag);
+                        setIsTagOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                        activeTag === tag ? "bg-zinc-100 text-black font-bold" : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2 truncate">
+                        {activeTag === tag && <Check className="h-3.5 w-3.5 text-black shrink-0" />}
+                        <span className="truncate">{tag}</span>
+                      </span>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -359,21 +345,31 @@ export default function ManageShelfTab({
         </div>
 
         {/* Search Bar Input */}
-        <div className="relative shrink-0 md:w-56">
-          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+        <div className="relative shrink-0 md:w-56 mt-2 md:mt-0">
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
           <input
             type="text"
             placeholder="Search shelf items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm pl-8 pr-3 py-2 text-xs text-zinc-900 font-semibold placeholder-zinc-400 outline-none transition-colors"
+            className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm pl-9 pr-3 py-2 text-xs text-zinc-900 font-semibold placeholder-zinc-400 outline-none transition-colors"
           />
         </div>
 
       </div>
 
-      {/* Items Table / Grid List */}
-      <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-sm overflow-hidden">
+      {/* Server-Side Pagination (Top) */}
+      <Pagination
+        page={page}
+        pages={pages}
+        total={total}
+        limit={limit}
+        onPageChange={onPageChange}
+        onLimitChange={onLimitChange}
+      />
+
+      {/* Items List */}
+      <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-sm overflow-hidden shadow-2xs">
         {filteredItems.length > 0 ? (
           filteredItems.map(item => {
             const isPinned = !!pinnedItemIds[item.id];
@@ -385,11 +381,11 @@ export default function ManageShelfTab({
             return (
               <div
                 key={item.id}
-                className="p-4 bg-white hover:bg-zinc-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="p-4 sm:p-5 bg-white hover:bg-zinc-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
-                <div className="flex items-start gap-3.5">
+                <div className="flex items-start gap-3.5 min-w-0">
                   
-                  {/* Resource Image (falls back to a type icon when none was fetched) */}
+                  {/* Resource Image */}
                   <div
                     className="h-10 w-10 shrink-0 border rounded-sm overflow-hidden flex items-center justify-center font-bold text-sm"
                     style={{ color: iconColor, backgroundColor: iconBg, borderColor: iconBorder }}
@@ -406,13 +402,13 @@ export default function ManageShelfTab({
                     )}
                   </div>
 
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-sm font-extrabold text-zinc-950">{item.title}</h4>
+                      <h4 className="text-sm font-black text-zinc-950 truncate">{item.title}</h4>
                       
                       {/* Type Badge */}
                       <span 
-                        className="text-[9px] font-bold border px-2 py-0.5 rounded-sm capitalize inline-flex items-center gap-1"
+                        className="text-[9px] font-bold border px-2.5 py-0.5 rounded-sm capitalize inline-flex items-center gap-1"
                         style={{ color: iconColor, backgroundColor: iconBg, borderColor: iconBorder }}
                       >
                         {renderTypeIcon(item.type)}
@@ -432,7 +428,7 @@ export default function ManageShelfTab({
                       {item.description}
                     </p>
 
-                    {/* Vibrant Tag Pills */}
+                    {/* Tag Pills */}
                     <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       {item.tags.map(t => {
                         const cleanTag = t.replace("#", "");
@@ -443,7 +439,7 @@ export default function ManageShelfTab({
                           <span 
                             key={t} 
                             onClick={() => setActiveTag(t)}
-                            className="text-[9px] font-bold border px-2 py-0.5 rounded-sm cursor-pointer hover:opacity-80 transition-opacity"
+                            className="text-[9px] font-bold border px-2.5 py-0.5 rounded-sm cursor-pointer hover:opacity-80 transition-opacity"
                             style={{ color: tagColor, backgroundColor: tagBg, borderColor: tagBorder }}
                           >
                             {cleanTag}
@@ -458,30 +454,30 @@ export default function ManageShelfTab({
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                   <button
                     onClick={() => onTogglePin(item.id)}
-                    className={`p-2 rounded-sm border transition-colors cursor-pointer text-xs font-bold flex items-center gap-1 ${
+                    className={`p-2 rounded-sm border transition-colors cursor-pointer text-xs font-bold flex items-center justify-center min-w-[36px] min-h-[36px] ${
                       isPinned
                         ? "bg-amber-50 border-amber-200 text-amber-900"
                         : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-100"
                     }`}
                     title={isPinned ? "Unpin featured" : "Pin as featured"}
                   >
-                    <Star className={`h-3.5 w-3.5 ${isPinned ? "fill-amber-500 text-amber-500" : ""}`} />
+                    <Star className={`h-4 w-4 ${isPinned ? "fill-amber-500 text-amber-500" : ""}`} />
                   </button>
 
                   <button
                     onClick={() => onOpenEditModal(item)}
-                    className="p-2 rounded-sm bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+                    className="p-2 rounded-sm bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                     title="Edit item"
                   >
-                    <PencilSimple className="h-3.5 w-3.5" />
+                    <PencilSimple className="h-4 w-4" />
                   </button>
 
                   <button
                     onClick={() => onRequestDelete(item)}
-                    className="p-2 rounded-sm bg-white border border-zinc-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="p-2 rounded-sm bg-white border border-zinc-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                     title="Delete item"
                   >
-                    <Trash className="h-3.5 w-3.5" />
+                    <Trash className="h-4 w-4" />
                   </button>
                 </div>
               </div>

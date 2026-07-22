@@ -60,24 +60,27 @@ export default function ItemModal({
   const [isTagFocused, setIsTagFocused] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const tagSegments = formData.tags.split(",");
-  const currentTagFragment = (tagSegments[tagSegments.length - 1] || "").trim().replace(/^#/, "").toLowerCase();
-  const alreadyUsedTags = new Set(
-    tagSegments.slice(0, -1).map(t => t.trim().replace(/^#/, "").toLowerCase())
-  );
-  const tagSuggestions = currentTagFragment
-    ? allTags
-        .filter(t => {
-          const clean = t.replace(/^#/, "").toLowerCase();
-          return clean.startsWith(currentTagFragment) && clean !== currentTagFragment && !alreadyUsedTags.has(clean);
-        })
-        .slice(0, 6)
+  const lastTagTyped = (formData.tags.split(",").pop() || "").trim().toLowerCase();
+
+  const tagSuggestions = lastTagTyped.length > 0
+    ? allTags.filter((t) => t.toLowerCase().includes(lastTagTyped) && !formData.tags.includes(t))
     : [];
 
   const applyTagSuggestion = (tag: string) => {
-    const priorTags = tagSegments.slice(0, -1).map(t => t.trim()).filter(Boolean);
-    setFormData({ ...formData, tags: `${[...priorTags, tag].join(", ")}, ` });
+    const parts = formData.tags.split(",").map((p) => p.trim());
+    parts.pop();
+    parts.push(tag);
+    setFormData((prev) => ({ ...prev, tags: parts.join(", ") + ", " }));
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -113,7 +116,6 @@ export default function ItemModal({
       clearTimeout(debounceRef.current);
       controller.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.link, isOpen]);
 
   if (!isOpen) return null;
@@ -121,60 +123,62 @@ export default function ItemModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in cursor-pointer"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in cursor-pointer"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border border-zinc-200 w-full max-w-lg rounded-sm shadow-2xl overflow-hidden cursor-default"
+        className="bg-white border border-zinc-200/90 w-full max-w-lg rounded-sm shadow-2xl overflow-hidden cursor-default max-h-[90vh] flex flex-col"
       >
-        <div className="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
-          <h3 className="text-xs font-black uppercase tracking-wider text-zinc-900 flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            {editingItem ? "Edit Mind-Shelf Influence" : "Add New Influence"}
+        <div className="p-4 sm:p-5 border-b border-zinc-200 flex items-center justify-between bg-zinc-50 shrink-0">
+          <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-zinc-900 flex items-center gap-2">
+            <Plus className="h-4 w-4 text-black" />
+            {editingItem ? "Edit Mind-Shelf Item" : "Add New Item"}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-black hover:bg-zinc-200/60 p-1.5 rounded-sm cursor-pointer transition-colors"
+            className="text-zinc-400 hover:text-black hover:bg-zinc-200/60 p-2 rounded-sm cursor-pointer transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+            title="Close modal"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={onSave} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={onSave} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
           <div>
             <label className="block text-xs font-bold text-zinc-700 mb-1">Resource Link URL *</label>
             <input
               type="url"
               required
-              placeholder="https://example.com/book"
+              placeholder="https://example.com/resource"
               value={formData.link}
               onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm px-3 py-2 text-xs font-semibold outline-none"
+              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm px-3.5 py-2.5 text-xs font-semibold outline-none"
             />
 
-            {/* Auto-resolved preview: image, title, category, follower/subscriber count */}
             {(previewLoading || formData.image || formData.title) && (
-              <div className="mt-2 flex items-center gap-2.5 p-2 bg-zinc-50 border border-zinc-200 rounded-sm">
-                <div className="h-10 w-10 shrink-0 border border-zinc-200 bg-white overflow-hidden flex items-center justify-center rounded-sm">
+              <div className="mt-2 flex items-center gap-3 p-3 bg-zinc-50 border border-zinc-200/80 rounded-sm">
+                <div className={`shrink-0 border border-zinc-200 bg-white overflow-hidden flex items-center justify-center rounded-sm ${
+                  formData.type === "book" ? "aspect-[3/4] w-10 h-14" : "h-10 w-10"
+                }`}>
                   {formData.image ? (
                     <img src={formData.image} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
                   ) : (
-                    <ImageSquare className="h-4 w-4 text-zinc-300 animate-pulse" />
+                    <ImageSquare className="h-5 w-5 text-zinc-300 animate-pulse" />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-zinc-700 truncate">
-                    {previewLoading ? "Resolving..." : formData.title || "Details not found — you can still save"}
+                  <p className="text-xs font-bold text-zinc-800 truncate">
+                    {previewLoading ? "Resolving link preview..." : formData.title || "Details not found — you can manually edit"}
                   </p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="inline-flex items-center gap-1 text-[9px] font-bold text-zinc-400 capitalize">
+                  <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-500 capitalize">
                       <TypeIcon type={formData.type} className="h-3 w-3" />
                       {TYPE_LABELS[formData.type] || formData.type}
                     </span>
                     {formData.resourceKind && <ResourceKindBadge kind={formData.resourceKind} />}
                     {formData.followerCount && (
-                      <span className="text-[9px] font-bold text-zinc-400">• {formData.followerCount}</span>
+                      <span className="text-[10px] font-bold text-zinc-400">• {formData.followerCount}</span>
                     )}
                   </div>
                 </div>
@@ -186,10 +190,10 @@ export default function ItemModal({
             <label className="block text-xs font-bold text-zinc-700 mb-1">Author / Creator</label>
             <input
               type="text"
-              placeholder="Resolved automatically from the link — edit if needed"
+              placeholder="Resolved automatically from link — edit if needed"
               value={formData.creator}
               onChange={(e) => setFormData({ ...formData, creator: e.target.value })}
-              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm px-3 py-2 text-xs font-semibold outline-none"
+              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm px-3.5 py-2.5 text-xs font-semibold outline-none"
             />
           </div>
 
@@ -201,7 +205,7 @@ export default function ItemModal({
               placeholder="What is this resource about?"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm p-3 text-xs font-medium outline-none"
+              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm p-3.5 text-xs font-medium outline-none"
             />
           </div>
 
@@ -212,7 +216,7 @@ export default function ItemModal({
               placeholder="Personal insight or why you recommend it..."
               value={formData.impact}
               onChange={(e) => setFormData({ ...formData, impact: e.target.value })}
-              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm p-3 text-xs font-medium outline-none italic"
+              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm p-3.5 text-xs font-medium outline-none italic"
             />
           </div>
 
@@ -225,11 +229,11 @@ export default function ItemModal({
               onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
               onFocus={() => setIsTagFocused(true)}
               onBlur={() => setIsTagFocused(false)}
-              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm px-3 py-2 text-xs font-semibold outline-none"
+              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm px-3.5 py-2.5 text-xs font-semibold outline-none"
             />
             {isTagFocused && tagSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-zinc-200 rounded-sm shadow-xl z-50 py-1 overflow-hidden animate-fade-in">
-                <div className="px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-100">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-zinc-200/90 rounded-sm shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in">
+                <div className="px-3.5 py-1 text-[9px] font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-100">
                   Similar tags already in use
                 </div>
                 {tagSuggestions.map((tag) => (
@@ -237,7 +241,7 @@ export default function ItemModal({
                     key={tag}
                     type="button"
                     onMouseDown={(e) => { e.preventDefault(); applyTagSuggestion(tag); }}
-                    className="w-full text-left px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-black cursor-pointer"
+                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-black cursor-pointer"
                   >
                     {tag}
                   </button>
@@ -246,19 +250,19 @@ export default function ItemModal({
             )}
           </div>
 
-          <div className="pt-4 border-t border-zinc-200 flex justify-end gap-2">
+          <div className="pt-4 border-t border-zinc-200 flex items-center justify-end gap-2 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-zinc-600 hover:text-black cursor-pointer"
+              className="px-4 py-2.5 text-xs font-bold text-zinc-600 hover:text-black cursor-pointer min-h-[44px]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-xs font-bold bg-black text-white hover:bg-zinc-900 rounded-sm transition-all cursor-pointer shadow-2xs"
+              className="px-5 py-2.5 text-xs font-bold bg-black text-white hover:bg-zinc-800 rounded-sm transition-all cursor-pointer shadow-xs min-h-[44px] active:scale-95"
             >
-              {editingItem ? "Update Influence" : "Add to Mind-Shelf"}
+              {editingItem ? "Update Item" : "Add to Mind-Shelf"}
             </button>
           </div>
         </form>
