@@ -211,19 +211,55 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
     return Array.from(tagsSet).sort();
   }, [items]);
 
+  // Modal & Notification states for user actions
+  const [itemToDelete, setItemToDelete] = useState<CurationItem | null>(null);
+  const [connectingIntegration, setConnectingIntegration] = useState<{ id: string; name: string } | null>(null);
+  const [integrationInput, setIntegrationInput] = useState("");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const triggerSuccess = (msg: string) => {
+    setSuccessMessage(msg);
+    setTimeout(() => setSuccessMessage(null), 3500);
+  };
+
   const handleShare = () => {
     setCopied(true);
     navigator.clipboard.writeText("https://blueprint.id/" + handleSettings.handle);
+    triggerSuccess("Copied public handle URL to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 
   const togglePin = (id: string) => {
-    setPinnedItemIds(prev => ({ ...prev, [id]: !prev[id] }));
+    setPinnedItemIds(prev => {
+      const isNowPinned = !prev[id];
+      const targetItem = items.find(i => i.id === id);
+      if (targetItem) {
+        triggerSuccess(isNowPinned ? `Pinned "${targetItem.title}" as featured!` : `Unpinned "${targetItem.title}"`);
+      }
+      return { ...prev, [id]: isNowPinned };
+    });
   };
 
-  const handleDeleteItem = (id: string) => {
-    if (confirm("Are you sure you want to remove this item from your mind-shelf?")) {
-      setItems(prev => prev.filter(i => i.id !== id));
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      const title = itemToDelete.title;
+      setItems(prev => prev.filter(i => i.id !== itemToDelete.id));
+      triggerSuccess(`Successfully removed "${title}" from your shelf.`);
+      setItemToDelete(null);
+    }
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    triggerSuccess("Profile & handle settings saved successfully!");
+  };
+
+  const handleConfirmIntegration = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (connectingIntegration) {
+      triggerSuccess(`Successfully connected ${connectingIntegration.name} integration!`);
+      setConnectingIntegration(null);
+      setIntegrationInput("");
     }
   };
 
@@ -285,6 +321,7 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
         }
         return i;
       }));
+      triggerSuccess(`Updated "${formData.title}" details.`);
     } else {
       const newItem: CurationItem = {
         id: "item-" + Date.now(),
@@ -299,6 +336,7 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
         size: "medium"
       };
       setItems(prev => [newItem, ...prev]);
+      triggerSuccess(`Added "${formData.title}" to your mind-shelf!`);
     }
 
     setIsAddModalOpen(false);
@@ -749,7 +787,7 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
                         </button>
 
                         <button
-                          onClick={() => handleDeleteItem(item.id)}
+                          onClick={() => setItemToDelete(item)}
                           className="p-2 rounded-sm bg-white border border-zinc-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                           title="Delete item"
                         >
@@ -901,7 +939,7 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
               </p>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); alert("Profile settings saved successfully!"); }} className="space-y-4">
+            <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-700 mb-1">Display Name</label>
@@ -1019,7 +1057,10 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
                     <p className="text-[10px] text-zinc-500 font-semibold">Sync public video bookmarks</p>
                   </div>
                 </div>
-                <button className="text-[10px] font-bold text-zinc-700 bg-white border border-zinc-200 px-3 py-1 rounded-sm hover:bg-zinc-100 cursor-pointer">
+                <button
+                  onClick={() => setConnectingIntegration({ id: "youtube", name: "YouTube Playlists" })}
+                  className="text-[10px] font-bold text-zinc-700 bg-white border border-zinc-200 px-3 py-1 rounded-sm hover:bg-zinc-100 cursor-pointer"
+                >
                   Connect
                 </button>
               </div>
@@ -1045,7 +1086,10 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
                     <p className="text-[10px] text-zinc-500 font-semibold">Publish newsletter essays</p>
                   </div>
                 </div>
-                <button className="text-[10px] font-bold text-zinc-700 bg-white border border-zinc-200 px-3 py-1 rounded-sm hover:bg-zinc-100 cursor-pointer">
+                <button
+                  onClick={() => setConnectingIntegration({ id: "rss", name: "Custom RSS / Substack" })}
+                  className="text-[10px] font-bold text-zinc-700 bg-white border border-zinc-200 px-3 py-1 rounded-sm hover:bg-zinc-100 cursor-pointer"
+                >
                   Connect
                 </button>
               </div>
@@ -1179,6 +1223,114 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
             </form>
 
           </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {itemToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-zinc-200 w-full max-w-md rounded-sm shadow-2xl overflow-hidden p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-sm bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                <Trash className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-zinc-950">Remove Mind-Shelf Item</h3>
+                <p className="text-xs text-zinc-500 font-semibold mt-0.5">This item will be un-published from your handle page.</p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-sm text-xs font-semibold text-zinc-800">
+              <span className="text-zinc-500 block text-[10px] capitalize font-bold">Item to remove:</span>
+              <span className="font-extrabold text-zinc-950">{itemToDelete.title}</span>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
+              <button
+                type="button"
+                onClick={() => setItemToDelete(null)}
+                className="px-4 py-2 text-xs font-bold text-zinc-600 hover:text-black cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="px-4 py-2 text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 rounded-sm transition-all cursor-pointer shadow-2xs"
+              >
+                Yes, Remove Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONNECT INTEGRATION MODAL */}
+      {connectingIntegration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-zinc-200 w-full max-w-md rounded-sm shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
+              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-900 flex items-center gap-2">
+                <Plugs className="h-4 w-4" />
+                Connect {connectingIntegration.name}
+              </h3>
+              <button
+                onClick={() => setConnectingIntegration(null)}
+                className="text-zinc-400 hover:text-black p-1 cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmIntegration} className="p-6 space-y-4">
+              <p className="text-xs text-zinc-600 font-medium">
+                Enter your {connectingIntegration.name} username or URL feed to automatically sync public bookmarks.
+              </p>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 mb-1">
+                  {connectingIntegration.name} Handle or Feed URL *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. @technomad or https://feed.url"
+                  value={integrationInput}
+                  onChange={(e) => setIntegrationInput(e.target.value)}
+                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm px-3 py-2 text-xs font-semibold outline-none"
+                />
+              </div>
+
+              <div className="pt-2 border-t border-zinc-100 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConnectingIntegration(null)}
+                  className="px-4 py-2 text-xs font-bold text-zinc-600 hover:text-black cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 text-xs font-bold bg-black text-white hover:bg-zinc-900 rounded-sm cursor-pointer"
+                >
+                  Connect Integration
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* TOAST SUCCESS NOTIFICATION */}
+      {successMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-950 text-white px-4 py-3 rounded-sm shadow-2xl border border-slate-800 flex items-center gap-3 animate-fade-in">
+          <div className="h-5 w-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold text-xs">
+            ✓
+          </div>
+          <span className="text-xs font-bold">{successMessage}</span>
+          <button onClick={() => setSuccessMessage(null)} className="text-zinc-400 hover:text-white ml-2 cursor-pointer">
+            <X className="h-3.5 w-3.5" />
+          </button>
         </div>
       )}
 
