@@ -1,8 +1,10 @@
 export type ItemType = "book" | "youtube" | "podcast" | "essay" | "x" | "design";
+export type ResourceKind = "post" | "video" | "channel" | "podcast" | "playlist" | "account" | "newsletter";
 
 export interface CurationItem {
   id: string;
   type: ItemType;
+  resourceKind?: ResourceKind;
   title: string;
   author?: string;
   creator?: string;
@@ -28,8 +30,10 @@ export interface HandleSettings {
   skills: string;
   isVerified: boolean;
   isPublic: boolean;
+  avatarUrl?: string;
+  bannerUrl?: string;
 }
 
 export type AuthMode = "login" | "signup";
 
-export type DashboardTab = "items" | "analytics" | "settings" | "integrations";
+export type DashboardTab = "items" | "analytics" | "settings";

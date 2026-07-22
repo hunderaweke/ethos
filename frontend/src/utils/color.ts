@@ -49,10 +49,29 @@ function getSocialMediaColor(platform: string, alpha: number = 1): string {
       return hexToRgba("#FE2C55", alpha);
     case "substack":
       return hexToRgba("#FF6719", alpha);
+    case "telegram":
+      return hexToRgba("#26A5E4", alpha);
     case "goodreads":
       return hexToRgba("#5B3E25", alpha);
     case "medium":
       return hexToRgba("#00AB6C", alpha);
+    // Resource-kind colors (post/video/channel/podcast/playlist) — same lookup,
+    // kept distinct from the brand colors above so a kind badge never collides
+    // with the type/category badge shown alongside it.
+    case "video":
+      return hexToRgba("#3B82F6", alpha);
+    case "channel":
+      return hexToRgba("#8B5CF6", alpha);
+    case "post":
+      return hexToRgba("#F59E0B", alpha);
+    case "playlist":
+      return hexToRgba("#EC4899", alpha);
+    case "account":
+      return hexToRgba("#14B8A6", alpha);
+    case "newsletter":
+      return hexToRgba("#FF6719", alpha);
+    case "podcast":
+      return hexToRgba("#7C3AED", alpha);
     default:
       return generateVibrantColor(platform, alpha);
   }
