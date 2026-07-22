@@ -58,10 +58,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "s
           
           {/* Brand Logo & Header */}
           <div className="space-y-2">
-            <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-zinc-100 border border-zinc-200 rounded-sm text-[10px] font-extrabold uppercase tracking-wider text-zinc-700 mb-1">
-              <Sparkle className="h-3 w-3 text-amber-500 fill-amber-500" />
-              <span>Google Single Sign-On</span>
-            </div>
             
             <h2 className="text-2xl font-extrabold text-zinc-950 font-sans tracking-tight">
               {mode === "signup" ? "Create your mind-shelf" : "Welcome back to"}

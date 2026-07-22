@@ -12,6 +12,7 @@ function App() {
   const [currentView, setCurrentView] = useState<"landing" | "profile" | "dashboard">("landing");
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const handleShowProfile = () => {
     setCurrentView("profile");
@@ -19,6 +20,10 @@ function App() {
   };
 
   const handleShowDashboard = () => {
+    if (!isLoggedIn) {
+      handleOpenAuth("login");
+      return;
+    }
     setCurrentView("dashboard");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -34,7 +39,14 @@ function App() {
   };
 
   const handleAuthSuccess = () => {
+    setIsLoggedIn(true);
     setCurrentView("dashboard");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentView("landing");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -45,7 +57,7 @@ function App() {
       {currentView === "profile" ? (
         <HandlePage onBack={handleGoHome} onViewDashboard={handleShowDashboard} onOpenAuth={handleOpenAuth} />
       ) : currentView === "dashboard" ? (
-        <Dashboard onViewProfile={handleShowProfile} onGoHome={handleGoHome} />
+        <Dashboard onViewProfile={handleShowProfile} onGoHome={handleGoHome} onLogout={handleLogout} />
       ) : (
         <>
           <Navbar 
