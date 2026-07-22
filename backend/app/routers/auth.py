@@ -75,6 +75,7 @@ async def google_auth(
                     user_id=user.id,
                     handle=body.claim_handle.lower(),
                     display_name=email.split("@")[0],
+                    avatar_url=user.avatar_url,
                 )
                 db.add(profile)
                 await db.flush()

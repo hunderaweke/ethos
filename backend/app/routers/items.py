@@ -1,12 +1,13 @@
+import math
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_current_user, get_db
 from app.models import AnalyticsEvent, CurationItem, Profile, User
-from app.schemas.item import ItemCreate, ItemOut, ItemUpdate
+from app.schemas.item import ItemCreate, ItemOut, ItemUpdate, PaginatedItems
 
 router = APIRouter(tags=["items"])
 
@@ -36,13 +37,37 @@ def _apply_filters(
     return stmt
 
 
-@router.get("/profiles/{handle}/items", response_model=list[ItemOut])
+async def _paginate_stmt(
+    stmt, page: int, limit: int, db: AsyncSession
+) -> PaginatedItems:
+    count_stmt = select(func.count()).select_from(stmt.subquery())
+    total = (await db.execute(count_stmt)).scalar_one()
+
+    pages = max(1, math.ceil(total / limit)) if total > 0 else 1
+    page = min(max(1, page), pages) if total > 0 else 1
+
+    paginated_stmt = stmt.order_by(CurationItem.created_at.desc()).offset((page - 1) * limit).limit(limit)
+    items = (await db.execute(paginated_stmt)).scalars().all()
+
+    return PaginatedItems(
+        items=[ItemOut.model_validate(item) for item in items],
+        total=total,
+        page=page,
+        limit=limit,
+        pages=pages,
+        has_more=page < pages,
+    )
+
+
+@router.get("/profiles/{handle}/items", response_model=PaginatedItems)
 async def list_public_items(
     handle: str,
     type: str | None = None,
     kind: str | None = None,
     tag: str | None = None,
     q: str | None = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Profile).where(Profile.handle == handle.lower()))
@@ -51,25 +76,25 @@ async def list_public_items(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Profile not found")
 
     stmt = select(CurationItem).where(CurationItem.profile_id == profile.id)
-    stmt = _apply_filters(stmt, type, kind, tag, q).order_by(CurationItem.created_at.desc())
-    items = (await db.execute(stmt)).scalars().all()
-    return items
+    stmt = _apply_filters(stmt, type, kind, tag, q)
+    return await _paginate_stmt(stmt, page, limit, db)
 
 
-@router.get("/items/me", response_model=list[ItemOut])
+@router.get("/items/me", response_model=PaginatedItems)
 async def list_my_items(
     type: str | None = None,
     kind: str | None = None,
     tag: str | None = None,
     q: str | None = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     profile = await _get_own_profile(db, user)
     stmt = select(CurationItem).where(CurationItem.profile_id == profile.id)
-    stmt = _apply_filters(stmt, type, kind, tag, q).order_by(CurationItem.created_at.desc())
-    items = (await db.execute(stmt)).scalars().all()
-    return items
+    stmt = _apply_filters(stmt, type, kind, tag, q)
+    return await _paginate_stmt(stmt, page, limit, db)
 
 
 @router.post("/items", response_model=ItemOut, status_code=status.HTTP_201_CREATED)

@@ -35,6 +35,7 @@ async def create_profile(
         user_id=user.id,
         handle=body.handle.lower(),
         display_name=body.display_name or body.handle,
+        avatar_url=user.avatar_url,
     )
     db.add(profile)
     await db.commit()

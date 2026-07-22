@@ -59,3 +59,12 @@ class ItemOut(BaseModel):
     click_count: int
     created_at: datetime
     updated_at: datetime
+
+
+class PaginatedItems(BaseModel):
+    items: list[ItemOut]
+    total: int
+    page: int
+    limit: int
+    pages: int
+    has_more: bool
