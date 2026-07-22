@@ -1,6 +1,11 @@
 import { XLogoIcon, DiscordLogoIcon, GithubLogoIcon } from "@phosphor-icons/react";
 
-export default function Footer({ onViewProfile }: { onViewProfile: () => void }) {
+interface FooterProps {
+  onViewProfile?: () => void;
+  onGoHome?: () => void;
+}
+
+export default function Footer({ onViewProfile, onGoHome }: FooterProps) {
   return (
     <footer className="w-full bg-zinc-950 text-zinc-400 pt-16 mt-12 border-t border-zinc-900">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-12">
@@ -10,7 +15,10 @@ export default function Footer({ onViewProfile }: { onViewProfile: () => void })
           
           {/* Logo & Branding */}
           <div className="md:col-span-2 flex flex-col gap-4 col-span-1">
-            <div className="flex items-center gap-2">
+            <div 
+              className={`flex items-center gap-2 ${onGoHome ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
+              onClick={onGoHome}
+            >
               <span className="text-lg font-bold tracking-tight text-white font-sans">
                 blueprint<span className="text-zinc-500 font-medium">.id</span>
               </span>
@@ -23,16 +31,28 @@ export default function Footer({ onViewProfile }: { onViewProfile: () => void })
           {/* Product Links */}
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:flex md:justify-end md:gap-12 col-span-1 md:col-span-3">
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Product</h4>
+              <h4 className="text-xs font-bold text-white capitalize tracking-wider mb-4">Product</h4>
               <ul className="flex flex-col gap-2.5 text-xs text-zinc-400">
-                <li>
-                  <button
-                    onClick={onViewProfile}
-                    className="hover:text-white transition-colors cursor-pointer bg-transparent border-none text-left p-0"
-                  >
-                    Mind-Shelf Preview
-                  </button>
-                </li>
+                {onGoHome && (
+                  <li>
+                    <button
+                      onClick={onGoHome}
+                      className="hover:text-white transition-colors cursor-pointer bg-transparent border-none text-left p-0"
+                    >
+                      ← Back to Home
+                    </button>
+                  </li>
+                )}
+                {onViewProfile && (
+                  <li>
+                    <button
+                      onClick={onViewProfile}
+                      className="hover:text-white transition-colors cursor-pointer bg-transparent border-none text-left p-0"
+                    >
+                      Mind-Shelf Preview
+                    </button>
+                  </li>
+                )}
                 <li><a href="#discovery" className="hover:text-white transition-colors">Discover Perspectives</a></li>
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
@@ -40,7 +60,7 @@ export default function Footer({ onViewProfile }: { onViewProfile: () => void })
             </div>
             {/* Company Links */}
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Company</h4>
+              <h4 className="text-xs font-bold text-white capitalize tracking-wider mb-4">Company</h4>
               <ul className="flex flex-col gap-2.5 text-xs text-zinc-400">
                 <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
@@ -50,7 +70,7 @@ export default function Footer({ onViewProfile }: { onViewProfile: () => void })
             </div>
             {/* Social Links */}
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Community</h4>
+              <h4 className="text-xs font-bold text-white capitalize tracking-wider mb-4">Community</h4>
               <ul className="flex flex-col gap-2.5 text-xs text-zinc-400">
                 <li>
                   <a href="#" className="flex items-center gap-1.5 hover:text-white transition-colors">
@@ -90,7 +110,10 @@ export default function Footer({ onViewProfile }: { onViewProfile: () => void })
           </div>
         </div>
 
-        <div className="pt-8 border-t border-zinc-900/60 text-center select-none overflow-hidden">
+        <div 
+          onClick={onGoHome || onViewProfile}
+          className={`pt-8 border-t border-zinc-900/60 text-center select-none overflow-hidden ${onGoHome || onViewProfile ? "cursor-pointer hover:opacity-90 transition-opacity" : ""}`}
+        >
           <span className="text-[16vw] sm:text-[18vw] lg:text-[max(13vw,15.5rem)] font-black tracking-tighter text-white block leading-none">
             blueprint<span className="text-zinc-500 font-medium">.id</span>
           </span>
@@ -100,3 +123,4 @@ export default function Footer({ onViewProfile }: { onViewProfile: () => void })
     </footer>
   );
 }
+

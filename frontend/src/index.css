@@ -60,3 +60,44 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Futuristic Minimal Aesthetics */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.4)); }
+  50% { opacity: 0.9; filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.8)); }
+}
+
+.animate-scanline {
+  animation: scanline 8s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.futuristic-grid-bg {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.futuristic-grid-bg-dark {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.futuristic-glass-card {
+  background: rgba(9, 9, 11, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+

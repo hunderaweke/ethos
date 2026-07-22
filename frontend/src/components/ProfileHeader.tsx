@@ -1,4 +1,4 @@
-import { ArrowLeft, ShareNetwork, Check } from "@phosphor-icons/react";
+import { ShareNetwork, Check, UserPlus, SealCheck, Compass, Code, MapPin } from "@phosphor-icons/react";
 
 interface ProfileHeaderProps {
   copied: boolean;
@@ -6,111 +6,125 @@ interface ProfileHeaderProps {
   onBack: () => void;
 }
 
-export default function ProfileHeader({ copied, onShare, onBack }: ProfileHeaderProps) {
+export default function ProfileHeader({ copied, onShare }: ProfileHeaderProps) {
   return (
-    <div className="w-full">
-      {/* Back navigation header */}
-      <div className="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-zinc-200 px-4 py-3.5">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <button 
-            onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-500 hover:text-black transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back to blueprint.id
-          </button>
+    <aside className="w-full lg:sticky lg:top-24 space-y-6">
+      {/* Sidebar Profile Card Container - Light Landing Page Theme */}
+      <div className="bg-white border border-zinc-200 shadow-sm relative group overflow-hidden rounded-sm">
+        
+        {/* Banner Header in Sidebar */}
+        <div className="relative h-36 sm:h-40 border-b border-zinc-200 bg-zinc-50 overflow-hidden select-none">
           
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 bg-black animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Live mind-shelf</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Hero Profile Banner & Metadata */}
-      <div className="max-w-6xl mx-auto px-4 mt-8">
-        {/* Abstract Blueprint/Drafting Banner Card */}
-        <div className="relative h-48 sm:h-64 border border-zinc-200 bg-zinc-50 overflow-hidden select-none">
-          {/* Blueprint Grid Background */}
-          <div 
-            className="absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(24, 24, 27, 0.5) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(24, 24, 27, 0.5) 1px, transparent 1px)
-              `,
-              backgroundSize: "24px 24px"
-            }}
-          />
-          
-          {/* Diagonal Drafting Lines */}
-          <svg className="absolute inset-0 w-full h-full text-zinc-300/60" xmlns="http://www.w3.org/2000/svg">
+          {/* Vector Drafting SVG Lines */}
+          <svg className="absolute inset-0 w-full h-full text-zinc-300/80" xmlns="http://www.w3.org/2000/svg">
             <line x1="-10%" y1="10%" x2="110%" y2="90%" stroke="currentColor" strokeWidth="1" strokeDasharray="4 8" />
             <line x1="-10%" y1="90%" x2="110%" y2="10%" stroke="currentColor" strokeWidth="1" strokeDasharray="4 8" />
-            
-            {/* Outline Circle (Compass mark) */}
-            <circle cx="50%" cy="50%" r="80" stroke="currentColor" strokeWidth="1" fill="none" strokeDasharray="2 4" />
-            <circle cx="50%" cy="50%" r="120" stroke="currentColor" strokeWidth="1" fill="none" />
-            <circle cx="50%" cy="50%" r="4" fill="currentColor" />
-            
-            {/* Coordinate markings */}
-            <line x1="50%" y1="10%" x2="50%" y2="90%" stroke="currentColor" strokeWidth="0.5" />
-            <line x1="10%" y1="50%" x2="90%" y2="50%" stroke="currentColor" strokeWidth="0.5" />
+            <circle cx="50%" cy="50%" r="60" stroke="currentColor" strokeWidth="1" fill="none" strokeDasharray="2 4" />
+            <circle cx="50%" cy="50%" r="90" stroke="currentColor" strokeWidth="1" fill="none" />
+            <circle cx="50%" cy="50%" r="3" fill="currentColor" />
           </svg>
 
-          {/* Glowing/Fade gradient overlays for depth */}
-          <div className="absolute inset-0 bg-gradient-to-r from-zinc-100/50 via-transparent to-zinc-100/50" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-zinc-50" />
-          
-          {/* Subtle floating drafting nodes */}
-          <div className="absolute left-[15%] top-[30%] w-3 h-3 border border-zinc-400 rotate-45" />
-          <div className="absolute right-[20%] top-[40%] w-4 h-4 border border-zinc-400 rounded-full" />
-          <div className="absolute right-[35%] bottom-[20%] w-2 h-2 bg-zinc-400" />
+          <div className="absolute inset-0 bg-gradient-to-r from-zinc-100/60 via-transparent to-zinc-100/60" />
+
+          {/* Minimalist Blueprint Label Badges */}
+          <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none text-[9px] font-bold text-zinc-500 capitalize tracking-wider">
+            <span className="bg-white/90 backdrop-blur-sm px-2 py-0.5 border border-zinc-200 shadow-2xs rounded-sm">Sys // Blueprint.id</span>
+            <span className="bg-white/90 backdrop-blur-sm px-2 py-0.5 border border-zinc-200 shadow-2xs rounded-sm">Node 01</span>
+          </div>
         </div>
 
-        {/* Profile Details Container */}
-        <div className="relative px-6 sm:px-12 pb-8 border-b border-zinc-200 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        {/* Profile Details Body */}
+        <div className="p-6 relative pt-0 z-10">
           
-          {/* Avatar Image (Absolutely Positioned, pulled up) */}
-          <img 
-            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
-            alt="Alex Rivera"
-            className="absolute left-6 sm:left-12 -top-16 sm:-top-20 h-32 w-32 sm:h-36 sm:w-36 object-cover border border-zinc-200 bg-white z-10 shadow-sm"
-          />
-          
-          {/* Profile Text Block */}
-          <div className="pt-20 md:pt-4 md:pl-44 mb-2 flex-1 text-left">
-            <div className="flex flex-wrap items-center justify-start gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-950">Alex Rivera</h1>
-              
+          {/* Avatar Image (Overlapping Banner) */}
+          <div className="relative -mt-14 mb-4 inline-block">
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 border border-zinc-200 bg-white z-10 shadow-sm overflow-hidden group-hover:border-black transition-colors rounded-sm">
+              <img 
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
+                alt="Alex Rivera"
+                className="w-full h-full object-cover"
+              />
             </div>
-            <p className="text-xs font-bold text-zinc-500 mt-1">blueprint.id/@technomad23</p>
-            <p className="text-sm text-zinc-650 font-medium mt-3 max-w-xl leading-relaxed">
-              Building tools for builders. Shaped by systems engineering, design history, and philosophical essays.
+            {/* Live Indicator */}
+            <span className="absolute bottom-1 right-1 flex h-3.5 w-3.5 z-20">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-black border-2 border-white"></span>
+            </span>
+          </div>
+
+          {/* Name & Handle */}
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-extrabold text-zinc-950 tracking-tight">Alex Rivera</h1>
+              <SealCheck className="h-5 w-5 text-black" weight="fill" />
+            </div>
+            <p className="text-xs font-bold text-zinc-500 mt-0.5">
+              blueprint.id/@technomad23
             </p>
-            <div className="flex gap-4 items-center justify-start mt-4 text-[10px] font-black uppercase tracking-wider text-zinc-400">
-              <span><strong className="text-zinc-900">14</strong> Influences</span>
-              <span className="h-1.5 w-1.5 bg-zinc-200" />
-              <span><strong className="text-zinc-900">2.4k</strong> Followers</span>
+          </div>
+
+          {/* Bio statement */}
+          <p className="text-xs text-zinc-650 font-medium leading-relaxed mt-3.5 border-l-2 border-black pl-3">
+            Building tools for builders. Shaped by systems engineering, design history, and philosophical essays.
+          </p>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 gap-2 mt-5 py-3 border-y border-zinc-200 text-[10px] font-bold capitalize tracking-wider">
+            <div className="bg-zinc-50 p-2.5 border border-zinc-200 text-left rounded-sm">
+              <span className="text-zinc-400 block text-[9px]">Influences</span>
+              <strong className="text-sm font-extrabold text-zinc-900">14 Items</strong>
+            </div>
+            <div className="bg-zinc-50 p-2.5 border border-zinc-200 text-left rounded-sm">
+              <span className="text-zinc-400 block text-[9px]">Followers</span>
+              <strong className="text-sm font-extrabold text-zinc-900">2.4k Minds</strong>
             </div>
           </div>
 
-          {/* Social share actions */}
-          <div className="flex gap-3 justify-center md:mb-2 w-full md:w-auto z-10">
+          {/* Metadata tags */}
+          <div className="mt-4 space-y-2 text-[11px] font-bold text-zinc-500">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-3.5 w-3.5 text-zinc-950" />
+              <span>San Francisco, CA</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Code className="h-3.5 w-3.5 text-zinc-950" />
+              <span>TypeScript • Rust • Distributed Systems</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Compass className="h-3.5 w-3.5 text-zinc-950" />
+              <span>Curator score: 99.8%</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-6 space-y-2.5">
             <button 
               onClick={onShare}
-              className="inline-flex items-center justify-center gap-1.5 border border-zinc-200 bg-white hover:bg-zinc-50 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-700 active:scale-98 transition-all cursor-pointer w-full md:w-auto"
+              className="w-full inline-flex items-center justify-center gap-2 border border-zinc-200 bg-white hover:bg-zinc-50 px-4 py-2.5 text-xs font-bold capitalize text-zinc-900 active:scale-98 transition-all cursor-pointer shadow-2xs rounded-sm"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-zinc-900" /> : <ShareNetwork className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-4 w-4 text-zinc-950" /> : <ShareNetwork className="h-4 w-4 text-zinc-950" />}
               {copied ? "Copied Link" : "Share Shelf"}
             </button>
-            <button className="inline-flex items-center justify-center gap-1.5 bg-black hover:bg-zinc-900 text-white px-5 py-2.5 text-xs font-black uppercase tracking-wider active:scale-98 transition-all cursor-pointer w-full md:w-auto">
+            <button className="w-full inline-flex items-center justify-center gap-2 bg-black hover:bg-zinc-900 text-white px-4 py-2.5 text-xs font-bold capitalize active:scale-98 transition-all cursor-pointer shadow-2xs rounded-sm">
+              <UserPlus className="h-4 w-4 text-white" />
               Follow Shelf
             </button>
           </div>
 
         </div>
+
+        {/* Card Footer HUD metadata line */}
+        <div className="px-6 py-2.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-[9px] font-bold capitalize tracking-wider text-zinc-400">
+          <span>Ethos // ID-0x8F92</span>
+          <span className="flex items-center gap-1.5 text-zinc-900">
+            <span className="h-1.5 w-1.5 rounded-full bg-black animate-pulse" />
+            Live mind-shelf
+          </span>
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }
+
+
+

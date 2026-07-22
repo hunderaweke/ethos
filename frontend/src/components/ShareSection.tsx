@@ -104,6 +104,8 @@ export default function ShareSection({ onViewProfile }: { onViewProfile: () => v
                     />
                   </div>
                   
+                  {/* Content */}
+                  
                   <Icon className={`h-5 w-5 sm:h-6 sm:w-6 text-slate-700 transition-all duration-300 group-hover:scale-115 relative z-10 ${item.hoverColor}`} />
                   
                   {/* Custom Tooltip (Top row shows downwards to prevent container boundary clipping) */}

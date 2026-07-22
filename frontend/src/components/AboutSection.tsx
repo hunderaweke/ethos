@@ -41,11 +41,11 @@ export default function AboutSection() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl font-sans leading-[1.15]">
-            Designed for power users <br />
-            who value minimal designs.
+            Thoughtfully designed <br />
+            for intentional people.
           </h2>
-          <p className="mt-4 text-sm text-zinc-500 font-semibold uppercase tracking-wider">
-            Everything you need to stand out and grow your audience.
+          <p className="mt-4 text-sm text-zinc-500 font-semibold  tracking-wider">
+            A minimal place to store and recommend without chaos.
           </p>
         </div>
 
