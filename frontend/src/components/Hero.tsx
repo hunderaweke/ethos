@@ -105,7 +105,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
           {/* Claim Username Input */}
           <form
             onSubmit={handleClaim}
-            className="relative max-w-lg mx-auto p-1.5 rounded-full bg-white shadow-md border border-zinc-300 flex items-center group transition-all focus-within:ring-2 focus-within:ring-zinc-900/10 focus-within:border-black"
+            className="relative max-w-lg mx-auto p-1.5 rounded-sm bg-white shadow-md border border-zinc-300 flex items-center group transition-all focus-within:ring-2 focus-within:ring-zinc-900/10 focus-within:border-black"
           >
             <div className="flex items-center pl-4 text-slate-400 font-medium">
               <span className="text-zinc-600 font-bold select-none text-base">
@@ -125,7 +125,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
             />
             <button
               type="submit"
-              className="rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 shadow-xs cursor-pointer"
+              className="rounded-sm bg-black px-6 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 shadow-xs cursor-pointer"
             >
               {isClaimed ? (
                 <>
@@ -141,12 +141,9 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
             </button>
           </form>
 
-          {/* Claim Subtext */}
-          <p className="mt-4 text-xs font-semibold text-slate-500">
-            Collect at one place{" "}
-            <span className="text-black cursor-pointer hover:text-zinc-800">
-              Share everywhere.
-            </span>
+          {/* Helper Micro-copy */}
+          <p className="mt-4 text-xs font-semibold text-slate-400 tracking-wide">
+            Free forever • Instant setup • No code required
           </p>
         </div>
       </div>
@@ -154,13 +151,13 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
       {/* Floating Card Elements (Visual decorations from reference) */}
       <div
         onClick={onViewProfile}
-        className="hidden xl:block absolute left-12 top-96 w-80 p-4 rounded-2xl bg-white shadow-md border border-zinc-200 animate-float-slow transition-transform hover:-translate-y-2 cursor-pointer hover:border-black/50"
+        className="hidden xl:block absolute left-12 top-96 w-80 p-4 rounded-sm bg-white shadow-md border border-zinc-200 animate-float-slow transition-transform hover:-translate-y-2 cursor-pointer hover:border-black/50"
       >
         <div className="flex items-center gap-3">
           <img
             src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120"
             alt="Sarah"
-            className="h-10 w-10 rounded-full object-cover ring-2 ring-zinc-100 grayscale hover:grayscale-0 transition-[filter] duration-300"
+            className="h-10 w-10 rounded-sm object-cover ring-2 ring-zinc-100 grayscale hover:grayscale-0 transition-[filter] duration-300"
           />
           <div>
             <h4 className="text-sm my-2 font-semibold text-slate-900">
@@ -169,7 +166,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
             <p className="text-xs text-slate-500">
               Curated:{" "}
               <span
-                className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                className="px-2 py-0.5 rounded-sm text-[10px] font-bold"
                 style={{
                   color: generateVibrantColor("Tech", 1),
                   backgroundColor: generateVibrantColor("Tech", 0.12),
@@ -179,7 +176,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
                 Tech
               </span>{" "}
               <span
-                className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                className="px-2 py-0.5 rounded-sm text-[10px] font-bold"
                 style={{
                   color: generateVibrantColor("Science", 1),
                   backgroundColor: generateVibrantColor("Science", 0.12),
@@ -194,7 +191,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
         </div>
         <div className="mt-3 flex gap-1.5 flex-wrap">
           <span
-            className="px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1"
+            className="px-2 py-0.5 rounded-sm text-[10px] font-semibold flex items-center gap-1"
             style={{
               color: getSocialMediaColor("youtube", 1),
               backgroundColor: getSocialMediaColor("youtube", 0.12),
@@ -208,7 +205,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
             @fireship
           </span>
           <span
-            className="px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1"
+            className="px-2 py-0.5 rounded-sm text-[10px] font-semibold flex items-center gap-1"
             style={{
               color: getSocialMediaColor("youtube", 1),
               backgroundColor: getSocialMediaColor("youtube", 0.12),
@@ -222,7 +219,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
             @veritasium
           </span>
           <span
-            className="px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1"
+            className="px-2 py-0.5 rounded-sm text-[10px] font-semibold flex items-center gap-1"
             style={{
               color: getSocialMediaColor("x", 1),
               backgroundColor: getSocialMediaColor("x", 0.12),
@@ -240,13 +237,13 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
 
       <div
         onClick={onViewProfile}
-        className="hidden xl:block absolute right-12 top-96 w-80 p-4 rounded-2xl bg-white shadow-md border border-zinc-200 animate-float-medium transition-transform hover:-translate-y-2 cursor-pointer hover:border-black/50"
+        className="hidden xl:block absolute right-12 top-96 w-80 p-4 rounded-sm bg-white shadow-md border border-zinc-200 animate-float-medium transition-transform hover:-translate-y-2 cursor-pointer hover:border-black/50"
       >
         <div className="flex items-center gap-3">
           <img
             src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120"
             alt="Liam"
-            className="h-10 w-10 rounded-full object-cover ring-2 ring-zinc-100 grayscale hover:grayscale-0 transition-[filter] duration-300"
+            className="h-10 w-10 rounded-sm object-cover ring-2 ring-zinc-100 grayscale hover:grayscale-0 transition-[filter] duration-300"
           />
           <div>
             <h4 className="text-sm my-2 font-semibold text-slate-900">
@@ -255,7 +252,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
             <p className="text-xs text-slate-500">
               Curated:{" "}
               <span
-                className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                className="px-2 py-0.5 rounded-sm text-[10px] font-bold"
                 style={{
                   color: generateVibrantColor("Design", 1),
                   backgroundColor: generateVibrantColor("Design", 0.12),
@@ -265,7 +262,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
                 Design
               </span>{" "}
               <span
-                className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                className="px-2 py-0.5 rounded-sm text-[10px] font-bold"
                 style={{
                   color: generateVibrantColor("Dev", 1),
                   backgroundColor: generateVibrantColor("Dev", 0.12),
@@ -280,7 +277,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
         </div>
         <div className="mt-3 flex gap-1.5 flex-wrap">
           <span
-            className="px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1"
+            className="px-2 py-0.5 rounded-sm text-[10px] font-semibold flex items-center gap-1"
             style={{
               color: getSocialMediaColor("youtube", 1),
               backgroundColor: getSocialMediaColor("youtube", 0.12),
@@ -294,7 +291,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
             @lexfridman
           </span>
           <span
-            className="px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1"
+            className="px-2 py-0.5 rounded-sm text-[10px] font-semibold flex items-center gap-1"
             style={{
               color: getSocialMediaColor("instagram", 1),
               backgroundColor: getSocialMediaColor("instagram", 0.12),
@@ -323,7 +320,7 @@ export default function Hero({ onViewProfile, onViewDashboard }: { onViewProfile
               return (
                 <div
                   key={index}
-                  className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-full border text-xs font-bold transition-all duration-300 select-none mx-2 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-sm border text-xs font-bold transition-all duration-300 select-none mx-2 cursor-pointer"
                   style={{
                     color: getSocialMediaColor(item.id, 1),
                     backgroundColor: getSocialMediaColor(item.id, 0.12),

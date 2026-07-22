@@ -69,7 +69,7 @@ export default function ShareSection({ onViewProfile }: { onViewProfile: () => v
           <div className="mt-2">
             <button
               onClick={onViewProfile}
-              className="inline-flex items-center justify-center px-6 py-3 border border-zinc-200 rounded-full bg-white text-sm font-bold text-slate-900 shadow-xs hover:bg-slate-50 transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center px-6 py-3 border border-zinc-200 rounded-sm bg-white text-sm font-bold text-slate-900 shadow-xs hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Start Curating
             </button> 
@@ -109,7 +109,7 @@ export default function ShareSection({ onViewProfile }: { onViewProfile: () => v
                   <Icon className={`h-5 w-5 sm:h-6 sm:w-6 text-slate-700 transition-all duration-300 group-hover:scale-115 relative z-10 ${item.hoverColor}`} />
                   
                   {/* Custom Tooltip (Top row shows downwards to prevent container boundary clipping) */}
-                  <span className={`absolute left-1/2 -translate-x-1/2 scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 rounded-lg bg-slate-950 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white transition-all duration-200 z-50 pointer-events-none whitespace-nowrap shadow-md ${
+                  <span className={`absolute left-1/2 -translate-x-1/2 scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 rounded-sm bg-slate-950 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white transition-all duration-200 z-50 pointer-events-none whitespace-nowrap shadow-md ${
                     isTopRow ? "top-full mt-2" : "bottom-full mb-2"
                   }`}>
                     {item.name}

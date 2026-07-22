@@ -157,13 +157,13 @@ export default function HandlePage({ onBack, onViewDashboard }: HandlePageProps)
       
       {/* Floating Navigation Header (Matches Landing Page Pill Navbar with Profile Page Adaptation) */}
       <header className="sticky top-4 z-50 w-full px-4 sm:px-6 max-w-7xl mx-auto pointer-events-none mb-4 sm:mb-6">
-        <div className="relative flex h-16 items-center justify-between px-4 sm:px-6 bg-white/85 backdrop-blur-md border border-zinc-200/80 rounded-full shadow-sm pointer-events-auto transition-all duration-300">
+        <div className="relative flex h-16 items-center justify-between px-4 sm:px-6 bg-white/85 backdrop-blur-md border border-zinc-200/80 rounded-sm shadow-sm pointer-events-auto transition-all duration-300">
           
           {/* Left Navigation Actions */}
           <div className="flex items-center gap-3">
             <button 
               onClick={onBack}
-              className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-black transition-colors cursor-pointer bg-zinc-100/90 hover:bg-zinc-200/80 px-3.5 py-1.5 rounded-full border border-zinc-200/60 group"
+              className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-black transition-colors cursor-pointer bg-zinc-100/90 hover:bg-zinc-200/80 px-3.5 py-1.5 rounded-sm border border-zinc-200/60 group"
             >
               <ArrowLeft className="h-3.5 w-3.5 text-zinc-900 group-hover:-translate-x-1 transition-transform" />
               <span className="hidden sm:inline font-sans">Back to Home</span>
@@ -191,20 +191,20 @@ export default function HandlePage({ onBack, onViewDashboard }: HandlePageProps)
             {onViewDashboard && (
               <button
                 onClick={onViewDashboard}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-full text-xs font-bold text-zinc-800 transition-all cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-sm text-xs font-bold text-zinc-800 transition-all cursor-pointer"
               >
                 <span>Dashboard</span>
               </button>
             )}
 
-            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-zinc-100/90 border border-zinc-200 rounded-full text-xs font-bold text-zinc-700">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-zinc-100/90 border border-zinc-200 rounded-sm text-xs font-bold text-zinc-700">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-slate-800 font-sans">@technomad23</span>
             </div>
 
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-md shadow-slate-950/10 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-sm bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-md shadow-slate-950/10 cursor-pointer"
             >
               {copied ? (
                 <>
