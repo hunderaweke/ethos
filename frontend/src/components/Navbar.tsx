@@ -1,6 +1,6 @@
 export default function Navbar({ onViewProfile, onViewDashboard }: { onViewProfile: () => void; onViewDashboard?: () => void }) {
   return (
-    <header className="sticky top-4 z-50 w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pointer-events-none -mb-20">
+    <header className="sticky top-4 z-50 w-full px-4 sm:px-6 max-w-7xl mx-auto pointer-events-none -mb-20">
       <div className="relative flex h-16 items-center justify-between px-6 bg-white/85 backdrop-blur-md border border-zinc-200/80 rounded-full shadow-sm pointer-events-auto transition-all duration-300">
         <nav className="hidden md:flex items-center gap-8">
           <button 

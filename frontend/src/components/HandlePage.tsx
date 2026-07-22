@@ -156,7 +156,7 @@ export default function HandlePage({ onBack, onViewDashboard }: HandlePageProps)
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-black selection:text-white relative overflow-x-hidden animate-fade-in flex flex-col justify-between">
       
       {/* Floating Navigation Header (Matches Landing Page Pill Navbar with Profile Page Adaptation) */}
-      <header className="sticky top-4 z-50 w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pointer-events-none mb-4 sm:mb-6">
+      <header className="sticky top-4 z-50 w-full px-4 sm:px-6 max-w-7xl mx-auto pointer-events-none mb-4 sm:mb-6">
         <div className="relative flex h-16 items-center justify-between px-4 sm:px-6 bg-white/85 backdrop-blur-md border border-zinc-200/80 rounded-full shadow-sm pointer-events-auto transition-all duration-300">
           
           {/* Left Navigation Actions */}

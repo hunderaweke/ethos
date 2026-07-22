@@ -322,7 +322,7 @@ export default function Dashboard({ onViewProfile, onGoHome }: DashboardProps) {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-black selection:text-white flex flex-col justify-between animate-fade-in relative">
       
       {/* Floating Minimal Navbar Bar */}
-      <header className="sticky top-4 z-40 w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pointer-events-none mb-6">
+      <header className="sticky top-4 z-40 w-full px-4 sm:px-6 max-w-7xl mx-auto pointer-events-none mb-6">
         <div className="relative flex h-16 items-center justify-between px-4 sm:px-6 bg-white/85 backdrop-blur-md border border-zinc-200/80 rounded-sm shadow-sm pointer-events-auto transition-all duration-300">
           
           {/* Left Actions */}
