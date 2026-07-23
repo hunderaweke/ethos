@@ -63,7 +63,7 @@ export default function Sidebar({
           </div>
           <div className="overflow-hidden">
             <h4 className="text-xs font-extrabold text-zinc-950 truncate">{handleSettings.displayName}</h4>
-            <p className="text-[10px] text-zinc-500 font-semibold truncate">@{handleSettings.handle}</p>
+            <p className="text-[10px] text-zinc-500 font-semibold truncate">{handleSettings.handle}</p>
           </div>
         </div>
 

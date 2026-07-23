@@ -341,9 +341,12 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
     return (
       <ClaimHandleForm
         onClaimed={async (handle, displayName) => {
-          await createProfile(handle, displayName);
+          const profile = await createProfile(handle, displayName);
+          setHandleSettings(toHandleSettings(profile));
+          setOriginalHandle(profile.handle);
           setNeedsProfile(false);
           setProfileReady(true);
+          refreshSummary();
         }}
         onGoHome={onGoHome}
       />
