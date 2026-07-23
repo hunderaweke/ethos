@@ -1,4 +1,7 @@
-export type ItemType = "book" | "youtube" | "podcast" | "essay" | "x" | "design";
+export type ItemType =
+  | "book" | "youtube" | "podcast" | "essay" | "x" | "design" | "social"
+  | "telegram" | "instagram" | "linkedin" | "spotify" | "github" | "discord"
+  | "figma" | "twitch" | "tiktok" | "reddit" | "goodreads" | "medium" | "substack";
 export type ResourceKind = "post" | "video" | "channel" | "podcast" | "playlist" | "account" | "newsletter";
 
 export interface CurationItem {

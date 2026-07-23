@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Plus, X, ImageSquare, BookOpen, YoutubeLogo, Microphone, FileText, XLogo, Palette } from "@phosphor-icons/react";
+import {
+  Plus, X, ImageSquare, BookOpen, YoutubeLogo, Microphone, FileText, XLogo, Palette, ShareNetwork,
+  TelegramLogo, InstagramLogo, LinkedinLogo, SpotifyLogo, GithubLogo, DiscordLogo, FigmaLogo,
+  TwitchLogo, TiktokLogo, RedditLogo, GoodreadsLogo, MediumLogo, Newspaper
+} from "@phosphor-icons/react";
 import type { CurationItem, ResourceKind } from "../../types";
 import { fetchLinkPreview } from "../../utils/api";
 import { ResourceKindBadge } from "../ResourceKindIcon";
@@ -34,6 +38,20 @@ const TYPE_LABELS: Record<string, string> = {
   essay: "Essay / Article",
   x: "Twitter / X",
   design: "Design",
+  social: "Social / Channel",
+  telegram: "Telegram",
+  instagram: "Instagram",
+  linkedin: "LinkedIn",
+  spotify: "Spotify",
+  github: "GitHub",
+  discord: "Discord",
+  figma: "Figma",
+  twitch: "Twitch",
+  tiktok: "TikTok",
+  reddit: "Reddit",
+  goodreads: "Goodreads",
+  medium: "Medium",
+  substack: "Substack",
 };
 
 function TypeIcon({ type, className }: { type: string; className: string }) {
@@ -43,6 +61,20 @@ function TypeIcon({ type, className }: { type: string; className: string }) {
     case "podcast": return <Microphone className={className} />;
     case "essay": return <FileText className={className} />;
     case "design": return <Palette className={className} />;
+    case "social": return <ShareNetwork className={className} />;
+    case "telegram": return <TelegramLogo className={className} />;
+    case "instagram": return <InstagramLogo className={className} />;
+    case "linkedin": return <LinkedinLogo className={className} />;
+    case "spotify": return <SpotifyLogo className={className} />;
+    case "github": return <GithubLogo className={className} />;
+    case "discord": return <DiscordLogo className={className} />;
+    case "figma": return <FigmaLogo className={className} />;
+    case "twitch": return <TwitchLogo className={className} />;
+    case "tiktok": return <TiktokLogo className={className} />;
+    case "reddit": return <RedditLogo className={className} />;
+    case "goodreads": return <GoodreadsLogo className={className} />;
+    case "medium": return <MediumLogo className={className} />;
+    case "substack": return <Newspaper className={className} />;
     default: return <BookOpen className={className} />;
   }
 }
@@ -159,7 +191,7 @@ export default function ItemModal({
             {(previewLoading || formData.image || formData.title) && (
               <div className="mt-2 flex items-center gap-3 p-3 bg-zinc-50 border border-zinc-200/80 rounded-sm">
                 <div className={`shrink-0 border border-zinc-200 bg-white overflow-hidden flex items-center justify-center rounded-sm ${
-                  formData.type === "book" ? "aspect-[3/4] w-10 h-14" : "h-10 w-10"
+                  formData.type === "book" || formData.type === "goodreads" ? "aspect-[3/4] w-10 h-14" : "h-10 w-10"
                 }`}>
                   {formData.image ? (
                     <img src={formData.image} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />

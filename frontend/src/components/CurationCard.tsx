@@ -1,12 +1,26 @@
-import { 
-  BookOpen, 
-  Microphone, 
-  FileText, 
-  Palette, 
-  ArrowSquareOut, 
+import {
+  BookOpen,
+  Microphone,
+  FileText,
+  Palette,
+  ArrowSquareOut,
   Heart,
   YoutubeLogo,
-  XLogo
+  XLogo,
+  ShareNetwork,
+  TelegramLogo,
+  InstagramLogo,
+  LinkedinLogo,
+  SpotifyLogo,
+  GithubLogo,
+  DiscordLogo,
+  FigmaLogo,
+  TwitchLogo,
+  TiktokLogo,
+  RedditLogo,
+  GoodreadsLogo,
+  MediumLogo,
+  Newspaper
 } from "@phosphor-icons/react";
 import { getSocialMediaColor, generateVibrantColor } from "../utils/color";
 import type { CurationItem } from "../types";
@@ -25,7 +39,7 @@ export interface CurationCardProps {
 export default function CurationCard({ item, isSaved, onToggleSave, onTagClick }: CurationCardProps) {
   const { showToast } = useToast();
 
-  const isBook = item.type === "book";
+  const isBook = item.type === "book" || item.type === "goodreads";
   const MEDIA_PREVIEW_KINDS = ["video", "playlist", "podcast", "post", "newsletter"];
   const isMediaPreview = !isBook && item.resourceKind ? MEDIA_PREVIEW_KINDS.includes(item.resourceKind) : false;
 
@@ -52,6 +66,34 @@ export default function CurationCard({ item, isSaved, onToggleSave, onTagClick }
         return <FileText className={iconClass} />;
       case "design":
         return <Palette className={iconClass} />;
+      case "social":
+        return <ShareNetwork className={iconClass} />;
+      case "telegram":
+        return <TelegramLogo className={iconClass} />;
+      case "instagram":
+        return <InstagramLogo className={iconClass} />;
+      case "linkedin":
+        return <LinkedinLogo className={iconClass} />;
+      case "spotify":
+        return <SpotifyLogo className={iconClass} />;
+      case "github":
+        return <GithubLogo className={iconClass} />;
+      case "discord":
+        return <DiscordLogo className={iconClass} />;
+      case "figma":
+        return <FigmaLogo className={iconClass} />;
+      case "twitch":
+        return <TwitchLogo className={iconClass} />;
+      case "tiktok":
+        return <TiktokLogo className={iconClass} />;
+      case "reddit":
+        return <RedditLogo className={iconClass} />;
+      case "goodreads":
+        return <GoodreadsLogo className={iconClass} />;
+      case "medium":
+        return <MediumLogo className={iconClass} />;
+      case "substack":
+        return <Newspaper className={iconClass} />;
       case "book":
       default:
         return <BookOpen className={iconClass} />;

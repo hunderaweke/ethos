@@ -33,7 +33,7 @@ export default function SettingsTab({
   const [pendingAvatarPreview, setPendingAvatarPreview] = useState<string | null>(null);
   const [pendingBannerFile, setPendingBannerFile] = useState<File | null>(null);
   const [pendingBannerPreview, setPendingBannerPreview] = useState<string | null>(null);
-  const availability = useHandleAvailability(draft.handle, originalHandle);
+  const availability = useHandleAvailability(draft.handle.replace(/^@/, ""), originalHandle);
 
   useEffect(() => {
     if (!isEditing) setDraft(handleSettings);

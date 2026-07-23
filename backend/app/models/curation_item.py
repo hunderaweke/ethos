@@ -8,7 +8,11 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db import Base
 from app.models.base import TimestampMixin, UUIDPkMixin
 
-ITEM_TYPES = ("book", "youtube", "podcast", "essay", "x", "design")
+ITEM_TYPES = (
+    "book", "youtube", "podcast", "essay", "x", "design", "social",
+    "telegram", "instagram", "linkedin", "spotify", "github", "discord",
+    "figma", "twitch", "tiktok", "reddit", "goodreads", "medium", "substack",
+)
 ITEM_SIZES = ("small", "medium", "large")
 RESOURCE_KINDS = ("post", "video", "channel", "podcast", "playlist", "account", "newsletter")
 

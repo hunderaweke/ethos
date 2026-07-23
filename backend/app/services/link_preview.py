@@ -33,19 +33,37 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 )
 
-# Domain -> ItemType hints, used when the platform-specific resolver (oEmbed)
-# doesn't already imply a type. Order matters — first match wins.
+# Landing-page marquee platforms that get their own dedicated ItemType rather
+# than a generic content category. Order matters — first match wins. Substack
+# is handled separately (custom-domain publications can't be caught by a
+# fixed domain list — see `_is_substack`).
+PLATFORM_DOMAIN_TYPES: list[tuple[str, str]] = [
+    ("t.me", "telegram"),
+    ("telegram.me", "telegram"),
+    ("instagram.com", "instagram"),
+    ("linkedin.com", "linkedin"),
+    ("open.spotify.com", "spotify"),
+    ("github.com", "github"),
+    ("discord.com", "discord"),
+    ("discord.gg", "discord"),
+    ("figma.com", "figma"),
+    ("twitch.tv", "twitch"),
+    ("tiktok.com", "tiktok"),
+    ("reddit.com", "reddit"),
+    ("goodreads.com", "goodreads"),
+    ("medium.com", "medium"),
+]
+
+# Domain -> ItemType hints for generic content categories that aren't tied to
+# one specific marquee platform. Order matters — first match wins.
 TYPE_DOMAIN_HINTS: list[tuple[str, str]] = [
-    ("goodreads.com", "book"),
     ("amazon.", "book"),
     ("openlibrary.org", "book"),
-    ("open.spotify.com", "podcast"),
     ("podcasts.apple.com", "podcast"),
     ("anchor.fm", "podcast"),
     ("overcast.fm", "podcast"),
     ("dribbble.com", "design"),
     ("behance.net", "design"),
-    ("figma.com", "design"),
 ]
 
 # Generic social platforms whose profile pages are "an account", not a
@@ -195,10 +213,18 @@ def _suggest_item_type(domain: str) -> str:
         return "youtube"
     if "x.com" in domain or "twitter.com" in domain:
         return "x"
+    if domain.endswith("substack.com"):
+        return "substack"
+    for hint_domain, item_type in PLATFORM_DOMAIN_TYPES:
+        if hint_domain in domain:
+            return item_type
     for hint_domain, item_type in TYPE_DOMAIN_HINTS:
         if hint_domain in domain:
             return item_type
-    return "essay"
+    # Everything else (a custom-domain Substack, a generic blog, an
+    # unrecognized social platform) — resolved further once the page loads
+    # (see the post-fetch Substack override in resolve_link_preview).
+    return "social"
 
 
 async def _from_youtube_oembed(client: httpx.AsyncClient, url: str) -> LinkPreview:
@@ -452,6 +478,12 @@ async def resolve_link_preview(db: AsyncSession, url: str, base_url: str | None 
         m = X_TITLE_NAME_RE.match(preview.title.strip())
         if m:
             preview.creator_name = m.group(1)
+
+    # Custom-domain Substack publications (newsletter.example.com) can't be
+    # spotted from the URL alone — only now, from the resolved page's image
+    # host / title suffix, can they be reclassified out of the "social" default.
+    if suggested_type == "social" and _is_substack(domain, preview):
+        suggested_type = "substack"
 
     preview.suggested_type = suggested_type
     if platform != "telegram":

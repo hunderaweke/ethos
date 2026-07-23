@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Check, X, MagnifyingGlassPlus, MagnifyingGlassMinus } from "@phosphor-icons/react";
+import { Check, X, WarningCircle, MagnifyingGlassPlus, MagnifyingGlassMinus } from "@phosphor-icons/react";
 import { getCroppedImageFile, type CropPixels } from "../utils/cropImage";
 
 interface ImageCropModalProps {
@@ -29,6 +29,7 @@ export default function ImageCropModal({
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,10 +46,13 @@ export default function ImageCropModal({
   const handleConfirm = async () => {
     if (!croppedAreaPixels) return;
     setProcessing(true);
+    setError(null);
     try {
       const crop: CropPixels = croppedAreaPixels;
       const file = await getCroppedImageFile(imageSrc, crop, outputWidth, outputHeight, fileName);
       onConfirm(file);
+    } catch {
+      setError("Couldn't process that image — try a different file.");
     } finally {
       setProcessing(false);
     }
@@ -94,6 +98,13 @@ export default function ImageCropModal({
           />
           <MagnifyingGlassPlus className="h-5 w-5 text-zinc-400 shrink-0" />
         </div>
+
+        {error && (
+          <div className="mx-5 mb-3 flex items-center gap-1.5 text-[11px] font-bold text-rose-600">
+            <WarningCircle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <div className="px-5 pb-5 flex justify-end gap-2">
           <button

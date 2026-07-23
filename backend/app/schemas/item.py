@@ -4,7 +4,11 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
-ItemType = Literal["book", "youtube", "podcast", "essay", "x", "design"]
+ItemType = Literal[
+    "book", "youtube", "podcast", "essay", "x", "design", "social",
+    "telegram", "instagram", "linkedin", "spotify", "github", "discord",
+    "figma", "twitch", "tiktok", "reddit", "goodreads", "medium", "substack",
+]
 ItemSize = Literal["small", "medium", "large"]
 ResourceKind = Literal["post", "video", "channel", "podcast", "playlist", "account", "newsletter"]
 

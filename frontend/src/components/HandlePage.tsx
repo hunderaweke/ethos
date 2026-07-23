@@ -154,6 +154,20 @@ export default function HandlePage({ onBack, isLoggedIn }: HandlePageProps) {
     { id: "essay", label: "Essays" },
     { id: "x", label: "Twitter / X" },
     { id: "design", label: "Design" },
+    { id: "telegram", label: "Telegram" },
+    { id: "instagram", label: "Instagram" },
+    { id: "linkedin", label: "LinkedIn" },
+    { id: "spotify", label: "Spotify" },
+    { id: "github", label: "GitHub" },
+    { id: "discord", label: "Discord" },
+    { id: "figma", label: "Figma" },
+    { id: "twitch", label: "Twitch" },
+    { id: "tiktok", label: "TikTok" },
+    { id: "reddit", label: "Reddit" },
+    { id: "goodreads", label: "Goodreads" },
+    { id: "medium", label: "Medium" },
+    { id: "substack", label: "Substack" },
+    { id: "social", label: "Social (Other)" },
   ];
 
   const kinds: { id: string; label: string }[] = [

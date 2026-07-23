@@ -16,7 +16,21 @@ import {
   Microphone,
   FileText,
   Palette,
-  XLogo
+  XLogo,
+  ShareNetwork,
+  TelegramLogo,
+  InstagramLogo,
+  LinkedinLogo,
+  SpotifyLogo,
+  GithubLogo,
+  DiscordLogo,
+  FigmaLogo,
+  TwitchLogo,
+  TiktokLogo,
+  RedditLogo,
+  GoodreadsLogo,
+  MediumLogo,
+  Newspaper
 } from "@phosphor-icons/react";
 import type { CurationItem, ResourceKind } from "../../types";
 import { generateVibrantColor, getSocialMediaColor } from "../../utils/color";
@@ -116,6 +130,20 @@ export default function ManageShelfTab({
     { id: "essay", label: "Essays" },
     { id: "x", label: "Twitter / X" },
     { id: "design", label: "Design" },
+    { id: "telegram", label: "Telegram" },
+    { id: "instagram", label: "Instagram" },
+    { id: "linkedin", label: "LinkedIn" },
+    { id: "spotify", label: "Spotify" },
+    { id: "github", label: "GitHub" },
+    { id: "discord", label: "Discord" },
+    { id: "figma", label: "Figma" },
+    { id: "twitch", label: "Twitch" },
+    { id: "tiktok", label: "TikTok" },
+    { id: "reddit", label: "Reddit" },
+    { id: "goodreads", label: "Goodreads" },
+    { id: "medium", label: "Medium" },
+    { id: "substack", label: "Substack" },
+    { id: "social", label: "Social (Other)" },
   ];
 
   const renderTypeIcon = (type: string) => {
@@ -126,6 +154,20 @@ export default function ManageShelfTab({
       case "podcast": return <Microphone className="h-4 w-4" />;
       case "essay": return <FileText className="h-4 w-4" />;
       case "design": return <Palette className="h-4 w-4" />;
+      case "social": return <ShareNetwork className="h-4 w-4" />;
+      case "telegram": return <TelegramLogo className="h-4 w-4" />;
+      case "instagram": return <InstagramLogo className="h-4 w-4" />;
+      case "linkedin": return <LinkedinLogo className="h-4 w-4" />;
+      case "spotify": return <SpotifyLogo className="h-4 w-4" />;
+      case "github": return <GithubLogo className="h-4 w-4" />;
+      case "discord": return <DiscordLogo className="h-4 w-4" />;
+      case "figma": return <FigmaLogo className="h-4 w-4" />;
+      case "twitch": return <TwitchLogo className="h-4 w-4" />;
+      case "tiktok": return <TiktokLogo className="h-4 w-4" />;
+      case "reddit": return <RedditLogo className="h-4 w-4" />;
+      case "goodreads": return <GoodreadsLogo className="h-4 w-4" />;
+      case "medium": return <MediumLogo className="h-4 w-4" />;
+      case "substack": return <Newspaper className="h-4 w-4" />;
       case "book":
       default: return <BookOpen className="h-4 w-4" />;
     }
