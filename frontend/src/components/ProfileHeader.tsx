@@ -120,26 +120,31 @@ export default function ProfileHeader({ profile, itemCount, copied, onShare, isF
           </div>
 
           {/* Action Buttons */}
-          <div className={`mt-6 grid grid-cols-1 ${isLoggedIn ? "sm:grid-cols-2 lg:grid-cols-1" : ""} gap-2.5`}>
-            <button
-              onClick={onShare}
-              className="w-full inline-flex items-center justify-center gap-2 border border-zinc-200 bg-white hover:bg-zinc-50 px-4 py-2.5 text-xs font-bold text-zinc-900 active:scale-95 transition-all cursor-pointer rounded-sm min-h-[44px]"
-            >
-              {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <ShareNetwork className="h-4 w-4 text-zinc-950" />}
-              {copied ? "Copied Link" : "Share Shelf"}
-            </button>
-            {isLoggedIn && (
-              <button
-                onClick={onToggleFollow}
-                className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold active:scale-95 transition-all cursor-pointer rounded-sm min-h-[44px] ${
-                  isFollowing ? "bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200" : "bg-black hover:bg-zinc-900 text-white"
-                }`}
-              >
-                <UserPlus className={`h-4 w-4 ${isFollowing ? "text-zinc-900" : "text-white"}`} />
-                {isFollowing ? "Following" : "Follow Shelf"}
-              </button>
-            )}
-          </div>
+          {(() => {
+            const canFollow = isLoggedIn && !profile.is_own_profile;
+            return (
+              <div className={`mt-6 grid grid-cols-1 ${canFollow ? "sm:grid-cols-2 lg:grid-cols-1" : ""} gap-2.5`}>
+                <button
+                  onClick={onShare}
+                  className="w-full inline-flex items-center justify-center gap-2 border border-zinc-200 bg-white hover:bg-zinc-50 px-4 py-2.5 text-xs font-bold text-zinc-900 active:scale-95 transition-all cursor-pointer rounded-sm min-h-[44px]"
+                >
+                  {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <ShareNetwork className="h-4 w-4 text-zinc-950" />}
+                  {copied ? "Copied Link" : "Share Shelf"}
+                </button>
+                {canFollow && (
+                  <button
+                    onClick={onToggleFollow}
+                    className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold active:scale-95 transition-all cursor-pointer rounded-sm min-h-[44px] ${
+                      isFollowing ? "bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200" : "bg-black hover:bg-zinc-900 text-white"
+                    }`}
+                  >
+                    <UserPlus className={`h-4 w-4 ${isFollowing ? "text-zinc-900" : "text-white"}`} />
+                    {isFollowing ? "Following" : "Follow Shelf"}
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
         </div>
 

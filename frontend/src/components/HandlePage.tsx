@@ -56,7 +56,9 @@ export default function HandlePage({ onBack, isLoggedIn }: HandlePageProps) {
     let cancelled = false;
     getPublicProfile(handle)
       .then((profileData) => {
-        if (!cancelled) setProfile(profileData);
+        if (cancelled) return;
+        setProfile(profileData);
+        setIsFollowing(profileData.is_following);
       })
       .catch(() => {
         if (!cancelled) setNotFound(true);
@@ -131,7 +133,7 @@ export default function HandlePage({ onBack, isLoggedIn }: HandlePageProps) {
   }, [savedItems]);
 
   const toggleFollow = () => {
-    if (!handle) return;
+    if (!handle || profile?.is_own_profile) return;
     const wasFollowing = isFollowing;
     setIsFollowing(!wasFollowing);
     showToast(

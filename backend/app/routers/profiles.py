@@ -6,8 +6,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.deps import get_current_user, get_db
-from app.models import AnalyticsEvent, Profile, User
+from app.deps import get_current_user, get_db, get_optional_user
+from app.models import AnalyticsEvent, Follow, Profile, User
 from app.schemas.profile import HandleAvailability, ProfileCreate, ProfileOut, ProfileUpdate
 from app.services.uploads import save_image_upload
 
@@ -163,14 +163,32 @@ async def upload_my_banner(
 
 
 @router.get("/profiles/{handle}", response_model=ProfileOut)
-async def get_public_profile(handle: str, db: AsyncSession = Depends(get_db)):
+async def get_public_profile(
+    handle: str,
+    db: AsyncSession = Depends(get_db),
+    user: User | None = Depends(get_optional_user),
+):
     result = await db.execute(select(Profile).where(Profile.handle == handle.lower()))
     profile = result.scalar_one_or_none()
     if profile is None or not profile.is_public:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Profile not found")
 
-    profile.view_count += 1
-    db.add(AnalyticsEvent(event_type="profile_view", profile_id=profile.id))
-    await db.commit()
-    await db.refresh(profile)
-    return profile
+    is_own_profile = user is not None and profile.user_id == user.id
+    if not is_own_profile:
+        profile.view_count += 1
+        db.add(AnalyticsEvent(event_type="profile_view", profile_id=profile.id))
+        await db.commit()
+        await db.refresh(profile)
+
+    is_following = False
+    if user is not None and not is_own_profile:
+        follow = await db.execute(
+            select(Follow).where(
+                Follow.follower_user_id == user.id, Follow.followed_profile_id == profile.id
+            )
+        )
+        is_following = follow.scalar_one_or_none() is not None
+
+    return ProfileOut.model_validate(profile).model_copy(
+        update={"is_following": is_following, "is_own_profile": is_own_profile}
+    )

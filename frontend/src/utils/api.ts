@@ -35,6 +35,8 @@ export interface ApiProfile {
   follower_count: number;
   view_count: number;
   curator_score: number | null;
+  is_following: boolean;
+  is_own_profile: boolean;
 }
 
 export interface ApiItem {

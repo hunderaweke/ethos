@@ -34,6 +34,8 @@ class ProfileOut(BaseModel):
     follower_count: int
     view_count: int
     curator_score: float | None
+    is_following: bool = False
+    is_own_profile: bool = False
 
 
 class HandleAvailability(BaseModel):
