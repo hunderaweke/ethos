@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     session_cookie_name: str = "ethos_session"
     session_ttl_days: int = 30
     frontend_origin: str = "http://localhost:5173"
+    # Absolute base for self-hosted asset URLs (cached resource images) when no
+    # request is in scope (e.g. the seed script). Overridden per-request by the
+    # actual request base_url in the link-preview route.
+    public_base_url: str = "http://localhost:8000"
     environment: str = "development"
 
 

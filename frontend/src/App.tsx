@@ -25,7 +25,7 @@ function Landing({
 }: {
   onViewProfile: () => void;
   onViewDashboard: () => void;
-  onOpenAuth: (mode?: "login" | "signup") => void;
+  onOpenAuth: (mode?: "login" | "signup", claimHandle?: string) => void;
   onGoHome: () => void;
   isLoggedIn: boolean;
   onLogout: () => void;
@@ -87,6 +87,7 @@ function App() {
   const navigate = useNavigate();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
+  const [pendingHandle, setPendingHandle] = useState<string | undefined>(undefined);
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [myHandle, setMyHandle] = useState<string | null>(null);
@@ -120,13 +121,15 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleOpenAuth = (mode: "login" | "signup" = "signup") => {
+  const handleOpenAuth = (mode: "login" | "signup" = "signup", claimHandle?: string) => {
     setAuthMode(mode);
+    setPendingHandle(claimHandle);
     setIsAuthOpen(true);
   };
 
   const handleAuthSuccess = () => {
     setIsLoggedIn(true);
+    setPendingHandle(undefined);
     getMe().then((me) => setMyHandle(me.profile?.handle ?? null)).catch(() => {});
     navigate("/dashboard");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -185,6 +188,7 @@ function App() {
           onClose={() => setIsAuthOpen(false)}
           onSuccess={handleAuthSuccess}
           initialMode={authMode}
+          claimHandle={pendingHandle}
         />
       </div>
     </ToastProvider>

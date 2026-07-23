@@ -1,14 +1,26 @@
 import re
 from datetime import datetime, timedelta, timezone
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse
 
 import httpx
 from bs4 import BeautifulSoup
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.models import LinkPreviewCache
 from app.schemas.link_preview import LinkPreview
+from app.services.uploads import store_cached_image
+
+MAX_IMAGE_BYTES = 10 * 1024 * 1024
+
+# Query params that identify the click/campaign, not the resource — dropped when
+# building the canonical cache key so the same link shared with different
+# tracking tails dedupes to one stored resource.
+TRACKING_PARAMS = {
+    "fbclid", "gclid", "igshid", "mc_cid", "mc_eid", "ref", "ref_src", "ref_url",
+    "si", "feature", "app", "ab_channel", "spm", "_branch_match_id", "s", "t",
+}
 
 CACHE_TTL = timedelta(hours=24)
 FETCH_TIMEOUT = 6.0
@@ -48,6 +60,20 @@ SOCIAL_PROFILE_DOMAINS = (
 # so the display name has to be recovered from the og:title, which otherwise
 # leaves creator_name as the useless og:site_name ("X (formerly Twitter)").
 X_TITLE_NAME_RE = re.compile(r"^(.*?)\s*\(@[^)]+\)\s+on\s+X$")
+
+# og:site_name on most social/content platforms is just the platform brand, not
+# the entity — "by Telegram" / "by GitHub" is noise, not a creator. Blanked so
+# the card falls back to the title (which holds the real name). Lowercased.
+PLATFORM_BRANDS = {
+    "telegram", "medium", "github", "spotify", "youtube", "reddit", "linkedin",
+    "instagram", "tiktok", "twitch", "goodreads", "x", "x (formerly twitter)",
+    "twitter", "facebook", "pinterest",
+}
+
+# Telegram serves full OG tags AND a subscriber/member line on t.me pages. The
+# "N subscribers" line (+ a "Preview channel" button) marks a broadcast channel;
+# a group shows "N members"; a bare user/bot shows neither.
+TG_PAGE_EXTRA_RE = re.compile(r'tgme_page_extra">([^<]*)<')
 
 SUBSCRIBER_COUNT_RE = re.compile(r'"subscriberCountText":.{0,200}?"simpleText":"([^"]+)"')
 # YouTube's own authoritative flag, emitted into the server-rendered page data
@@ -118,12 +144,7 @@ def _detect_resource_kind(
 
     segments = [s for s in path.split("/") if s]
 
-    # Telegram: t.me/<name>/<n> is a single message; t.me/<name> is the
-    # channel/account itself.
-    if domain in ("t.me", "telegram.me") or domain.endswith(".t.me"):
-        if len(segments) >= 2 and segments[-1].isdigit():
-            return "post"
-        return "account"
+    # (Telegram is classified by its own resolver from live page signals, not here.)
 
     # Spotify: distinguish shows/episodes (podcast) from playlists and artists.
     # Checked before the podcast domain-hint below so a Spotify playlist/artist
@@ -150,6 +171,12 @@ def _detect_resource_kind(
         if segments[0].startswith("@"):
             return "post" if len(segments) >= 2 else "account"
         return "post"
+
+    # LinkedIn profiles/companies live under a prefixed path (/in/<user>,
+    # /company/<name>, /school/<name>) — the bare-segment rule below misses them.
+    if domain.endswith("linkedin.com") and segments:
+        if segments[0] in ("in", "company", "school"):
+            return "account"
 
     if suggested_type == "podcast":
         return "podcast"
@@ -256,14 +283,125 @@ async def _from_open_graph(client: httpx.AsyncClient, url: str, platform: str) -
     )
 
 
-async def resolve_link_preview(db: AsyncSession, url: str) -> LinkPreview:
-    cached = await db.get(LinkPreviewCache, url)
+async def _from_telegram(client: httpx.AsyncClient, url: str) -> LinkPreview:
+    """One fetch of a t.me page → OG tags + channel/account/post classification.
+
+    A t.me/<name>/<n> URL is a single message (post). Otherwise the page's
+    subscriber/member line disambiguates what a bare t.me/<name> is: a
+    "N subscribers" line (+ "Preview channel") is a broadcast channel; anything
+    else (a group's "N members", or a plain user/bot) is treated as an account.
+    The subscriber/member count doubles as the follower_count.
+    """
+    try:
+        resp = await client.get(url, headers={"User-Agent": USER_AGENT}, follow_redirects=True)
+        resp.raise_for_status()
+    except httpx.HTTPError:
+        return LinkPreview(platform="telegram")
+
+    html = resp.text
+    soup = BeautifulSoup(html, "html.parser")
+
+    def meta(*names: str) -> str | None:
+        for name in names:
+            tag = soup.find("meta", attrs={"property": name}) or soup.find(
+                "meta", attrs={"name": name}
+            )
+            if tag and tag.get("content"):
+                return tag["content"]
+        return None
+
+    segments = [s for s in urlparse(url).path.split("/") if s]
+    extra_match = TG_PAGE_EXTRA_RE.search(html)
+    extra = extra_match.group(1).strip() if extra_match else ""
+    extra_lower = extra.lower()
+
+    if len(segments) >= 2 and segments[-1].isdigit():
+        kind = "post"
+    elif "subscriber" in extra_lower or "preview channel" in html.lower():
+        kind = "channel"
+    else:
+        # group ("N members") or a plain user/bot — no broadcast-channel concept,
+        # so it reads as an account.
+        kind = "account"
+
+    follower_count = extra if ("subscriber" in extra_lower or "member" in extra_lower) else None
+
+    return LinkPreview(
+        platform="telegram",
+        title=meta("og:title", "twitter:title"),
+        image_url=meta("og:image", "twitter:image"),
+        description=meta("og:description", "twitter:description"),
+        # The channel/user title already carries the entity name; there's no
+        # separate creator, and og:site_name would just say "Telegram".
+        creator_name=None,
+        resource_kind=kind,
+        follower_count=follower_count,
+    )
+
+
+def _normalize_url(url: str) -> str:
+    """Canonical key for a link so variants of the same resource collapse to one
+    cache entry: https, no "www.", no fragment, no trailing slash, tracking
+    params stripped, remaining params sorted. The original URL is still used for
+    the actual fetch — only the cache/dedup key is normalized.
+    """
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+
+    params = [
+        (k, v)
+        for k, v in parse_qsl(parsed.query, keep_blank_values=False)
+        if k.lower() not in TRACKING_PARAMS and not k.lower().startswith("utm_")
+    ]
+    params.sort()
+    query = urlencode(params)
+
+    path = parsed.path.rstrip("/") or "/"
+    normalized = f"https://{host}{path}"
+    if query:
+        normalized += f"?{query}"
+    return normalized
+
+
+async def _cache_image(client: httpx.AsyncClient, image_url: str, base_url: str) -> str | None:
+    """Download a resolved remote image and re-host it locally, returning an
+    absolute URL to our own copy (or None on failure — caller keeps the remote
+    URL as a fallback). Dedup happens by content hash inside store_cached_image.
+    """
+    try:
+        resp = await client.get(image_url, headers={"User-Agent": USER_AGENT}, follow_redirects=True)
+        resp.raise_for_status()
+    except httpx.HTTPError:
+        return None
+    if len(resp.content) > MAX_IMAGE_BYTES:
+        return None
+    relative = store_cached_image(resp.content)
+    if relative is None:
+        return None
+    return f"{base_url.rstrip('/')}{relative}"
+
+
+async def resolve_link_preview(db: AsyncSession, url: str, base_url: str | None = None) -> LinkPreview:
+    base_url = base_url or settings.public_base_url
+    # One stored copy per resource: variants of the same link (tracking params,
+    # www, trailing slash, http/https) share this canonical key, so a link
+    # curated by many people is resolved and cached exactly once.
+    cache_key = _normalize_url(url)
+    cached = await db.get(LinkPreviewCache, cache_key)
     if cached is not None and cached.fetched_at > datetime.now(timezone.utc) - CACHE_TTL:
         return LinkPreview.model_validate(cached.resolved)
 
     domain = urlparse(url).hostname or ""
     suggested_type = _suggest_item_type(domain)
-    platform = "youtube" if suggested_type == "youtube" else "x" if suggested_type == "x" else "web"
+    is_telegram = domain in ("t.me", "telegram.me") or domain.endswith(".t.me")
+    platform = (
+        "youtube" if suggested_type == "youtube"
+        else "x" if suggested_type == "x"
+        else "telegram" if is_telegram
+        else "web"
+    )
 
     async with httpx.AsyncClient(timeout=FETCH_TIMEOUT) as client:
         try:
@@ -271,6 +409,8 @@ async def resolve_link_preview(db: AsyncSession, url: str) -> LinkPreview:
                 preview = await _from_youtube_oembed(client, url)
             elif platform == "x":
                 preview = await _from_twitter_oembed(client, url)
+            elif platform == "telegram":
+                preview = await _from_telegram(client, url)
             else:
                 preview = await _from_open_graph(client, url, platform)
         except httpx.HTTPError:
@@ -296,6 +436,14 @@ async def resolve_link_preview(db: AsyncSession, url: str) -> LinkPreview:
         if platform == "youtube":
             preview.follower_count, is_podcast = await _youtube_page_signals(client, url)
 
+        # Re-host the resolved image on our own storage (deduped by content hash)
+        # so the shelf never hotlinks a third-party CDN that may rate-limit,
+        # require a referer, or rot — and so identical images are stored once.
+        if preview.image_url and not preview.image_url.startswith(base_url):
+            local_image = await _cache_image(client, preview.image_url, base_url)
+            if local_image:
+                preview.image_url = local_image
+
     # X profile pages expose no author meta, so creator_name ends up as the
     # og:site_name ("X (formerly Twitter)"). Recover the real display name from
     # the og:title instead; leave tweet pages (where oEmbed already gave a
@@ -306,15 +454,23 @@ async def resolve_link_preview(db: AsyncSession, url: str) -> LinkPreview:
             preview.creator_name = m.group(1)
 
     preview.suggested_type = suggested_type
-    resource_kind = _detect_resource_kind(url, suggested_type, preview)
-    # Override with "podcast" when YouTube's own flag says this playlist/show is
-    # a podcast — it's a podcast even when hosted on YouTube rather than Spotify.
-    preview.resource_kind = "podcast" if is_podcast else resource_kind
+    if platform != "telegram":
+        # Telegram already classified itself from live page signals
+        # (subscribers/members); the URL-shape detector would only downgrade it.
+        resource_kind = _detect_resource_kind(url, suggested_type, preview)
+        # Override with "podcast" when YouTube's own flag says this playlist/show
+        # is a podcast — a podcast even when hosted on YouTube, not Spotify.
+        preview.resource_kind = "podcast" if is_podcast else resource_kind
 
-    existing = await db.execute(select(LinkPreviewCache).where(LinkPreviewCache.url == url))
+    # Strip creator_name when it's just the platform's brand (og:site_name on
+    # Medium/GitHub/etc.) — the title already carries the real entity name.
+    if preview.creator_name and preview.creator_name.strip().lower() in PLATFORM_BRANDS:
+        preview.creator_name = None
+
+    existing = await db.execute(select(LinkPreviewCache).where(LinkPreviewCache.url == cache_key))
     row = existing.scalar_one_or_none()
     if row is None:
-        db.add(LinkPreviewCache(url=url, resolved=preview.model_dump()))
+        db.add(LinkPreviewCache(url=cache_key, resolved=preview.model_dump()))
     else:
         row.resolved = preview.model_dump()
         row.fetched_at = datetime.now(timezone.utc)

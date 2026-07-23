@@ -82,6 +82,7 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [needsProfile, setNeedsProfile] = useState(false);
+  const [profileReady, setProfileReady] = useState(false);
   const [items, setItems] = useState<CurationItem[]>([]);
   const [pinnedItemIds, setPinnedItemIds] = useState<Record<string, boolean>>({});
   const [handleSettings, setHandleSettings] = useState<HandleSettings>(EMPTY_SETTINGS);
@@ -124,6 +125,7 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
       .then((profile) => {
         if (cancelled) return;
         setNeedsProfile(false);
+        setProfileReady(true);
         setHandleSettings(toHandleSettings(profile));
         setOriginalHandle(profile.handle);
         refreshSummary();
@@ -168,10 +170,10 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
   }, [filterCategory, filterKind, activeTag, searchQuery, page, limit]);
 
   useEffect(() => {
-    if (!needsProfile) {
+    if (profileReady) {
       fetchMyItems();
     }
-  }, [needsProfile, fetchMyItems]);
+  }, [profileReady, fetchMyItems]);
 
   const allTags = useMemo(() => {
     const tagsSet = new Set<string>();
@@ -341,7 +343,7 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
         onClaimed={async (handle, displayName) => {
           await createProfile(handle, displayName);
           setNeedsProfile(false);
-          fetchMyItems();
+          setProfileReady(true);
         }}
         onGoHome={onGoHome}
       />

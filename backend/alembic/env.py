@@ -3,18 +3,20 @@ from logging.config import fileConfig
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
 
-from app.config import settings
-from app.db import Base
+from app.db import DB_CONNECT_ARGS, DB_URL, Base
 from app.models import *  # noqa: F401,F403  (registers all models on Base.metadata)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# NOTE: the DB URL is deliberately NOT pushed into config.set_main_option — it
+# routes through ConfigParser, which treats a "%" in the password (e.g. a
+# URL-encoded "%25") as interpolation syntax and crashes. The engine is built
+# straight from the already-parsed DB_URL object instead.
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -41,9 +43,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=DB_URL.render_as_string(hide_password=False),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -66,10 +67,12 @@ async def run_async_migrations() -> None:
 
     """
 
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    # Build straight from the parsed URL object (bypasses ConfigParser) and
+    # carry the SSL connect_args so managed Postgres (Supabase/Aiven/...) works.
+    connectable = create_async_engine(
+        DB_URL,
         poolclass=pool.NullPool,
+        connect_args=DB_CONNECT_ARGS,
     )
 
     async with connectable.connect() as connection:

@@ -30,7 +30,7 @@ import HandleAvailabilityBadge, { handleStatusBorderClass } from "./HandleAvaila
 interface HeroProps {
   onViewProfile: () => void;
   onViewDashboard?: () => void;
-  onOpenAuth?: (mode: "login" | "signup") => void;
+  onOpenAuth?: (mode: "login" | "signup", claimHandle?: string) => void;
 }
 
 // Purely decorative — a "curate from anywhere" strip, not a claim of
@@ -81,7 +81,7 @@ export default function Hero({ onViewProfile, onViewDashboard, onOpenAuth }: Her
     setTimeout(() => {
       setIsClaimed(false);
       if (onOpenAuth) {
-        onOpenAuth("signup");
+        onOpenAuth("signup", username);
       } else if (onViewDashboard) {
         onViewDashboard();
       } else {

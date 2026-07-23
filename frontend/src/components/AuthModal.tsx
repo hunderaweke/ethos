@@ -8,9 +8,10 @@ interface AuthModalProps {
   onClose: () => void;
   onSuccess: () => void;
   initialMode?: "login" | "signup";
+  claimHandle?: string;
 }
 
-export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onSuccess, claimHandle }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,9 +20,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   const handleCredential = (idToken: string) => {
     setError(null);
     setIsLoading(true);
-    googleAuth(idToken)
-      .then(() => {
+    googleAuth(idToken, claimHandle)
+      .then((res) => {
         setIsLoading(false);
+        if (claimHandle && res.profile?.handle !== claimHandle) {
+          setError(`@${claimHandle} was just taken by someone else — you're signed in, pick another handle from your dashboard.`);
+          onSuccess();
+          return;
+        }
         setIsSuccess(true);
         setTimeout(() => {
           setIsSuccess(false);
