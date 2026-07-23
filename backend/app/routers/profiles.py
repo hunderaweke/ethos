@@ -1,13 +1,57 @@
+from html import escape
+
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi.responses import HTMLResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.deps import get_current_user, get_db
 from app.models import AnalyticsEvent, Profile, User
 from app.schemas.profile import HandleAvailability, ProfileCreate, ProfileOut, ProfileUpdate
 from app.services.uploads import save_image_upload
 
 router = APIRouter(tags=["profiles"])
+
+
+@router.get("/share/{handle}", response_class=HTMLResponse, include_in_schema=False)
+async def share_profile(handle: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Profile).where(Profile.handle == handle.lower()))
+    profile = result.scalar_one_or_none()
+    if profile is None or not profile.is_public:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Profile not found")
+
+    title = f"{profile.display_name or profile.handle} (@{profile.handle}) · blueprint.id"
+    description = profile.bio.strip() or f"Check out @{profile.handle}'s curated Mind-Shelf on blueprint.id."
+    canonical = f"{settings.frontend_origin}/@{profile.handle}"
+
+    image_tags = ""
+    if profile.avatar_url:
+        image_tags = (
+            f'<meta property="og:image" content="{escape(profile.avatar_url)}" />'
+            f'<meta name="twitter:image" content="{escape(profile.avatar_url)}" />'
+        )
+
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>{escape(title)}</title>
+<meta name="description" content="{escape(description)}" />
+<link rel="canonical" href="{canonical}" />
+<meta property="og:type" content="profile" />
+<meta property="og:site_name" content="blueprint.id" />
+<meta property="og:title" content="{escape(title)}" />
+<meta property="og:description" content="{escape(description)}" />
+<meta property="og:url" content="{canonical}" />
+{image_tags}
+<meta name="twitter:card" content="{"summary_large_image" if profile.avatar_url else "summary"}" />
+<meta name="twitter:title" content="{escape(title)}" />
+<meta name="twitter:description" content="{escape(description)}" />
+</head>
+<body></body>
+</html>"""
+    return HTMLResponse(html)
 
 
 @router.get("/handles/{handle}/availability", response_model=HandleAvailability)

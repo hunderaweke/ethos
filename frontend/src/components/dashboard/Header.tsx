@@ -1,4 +1,4 @@
-import { CaretRight, Eye, Plus, List } from "@phosphor-icons/react";
+import { CaretRight, Check, Eye, Plus, List, ShareNetwork } from "@phosphor-icons/react";
 import type { DashboardTab } from "../../types";
 
 interface HeaderProps {
@@ -6,13 +6,17 @@ interface HeaderProps {
   onViewProfile: () => void;
   onOpenAddModal: () => void;
   onOpenMobileSidebar?: () => void;
+  onShare: () => void;
+  copied: boolean;
 }
 
 export default function Header({
   activeTab,
   onViewProfile,
   onOpenAddModal,
-  onOpenMobileSidebar
+  onOpenMobileSidebar,
+  onShare,
+  copied
 }: HeaderProps) {
   const getSectionTitle = () => {
     switch (activeTab) {
@@ -49,6 +53,23 @@ export default function Header({
         >
           <Eye className="h-3.5 w-3.5" />
           <span>View Handle</span>
+        </button>
+
+        <button
+          onClick={onShare}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200/80 px-3.5 py-2 rounded-sm transition-all cursor-pointer min-h-[38px]"
+        >
+          {copied ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">Copied!</span>
+            </>
+          ) : (
+            <>
+              <ShareNetwork className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Share</span>
+            </>
+          )}
         </button>
 
         <button

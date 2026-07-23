@@ -1,4 +1,4 @@
-import { Eye, Heart, Sparkle, BookOpen } from "@phosphor-icons/react";
+import { Heart, Sparkle, BookOpen } from "@phosphor-icons/react";
 import type { AnalyticsSummary } from "../../utils/api";
 
 interface KpiCardsProps {
@@ -14,23 +14,12 @@ function formatCount(n: number): string {
 }
 
 export default function KpiCards({ summary, totalItems, categoryCount }: KpiCardsProps) {
-  const views = summary?.total_shelf_views ?? 0;
   const saves = summary?.community_saves ?? 0;
   const activeItems = summary?.active_items ?? totalItems;
   const curatorScore = summary?.curator_score;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-
-      <div className="bg-white border border-zinc-200/90 p-5 sm:p-6 rounded-sm shadow-xs">
-        <div className="flex justify-between items-center text-zinc-500 mb-2">
-          <span className="text-[11px] sm:text-xs font-bold capitalize tracking-wider truncate">Total shelf views</span>
-          <Eye className="h-4 w-4 text-zinc-400 shrink-0" />
-        </div>
-        <div className="flex items-baseline justify-between flex-wrap gap-1">
-          <h3 className="text-xl sm:text-2xl font-black text-zinc-950">{formatCount(views)}</h3>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
 
       <div className="bg-white border border-zinc-200/90 p-5 sm:p-6 rounded-sm shadow-xs">
         <div className="flex justify-between items-center text-zinc-500 mb-2">

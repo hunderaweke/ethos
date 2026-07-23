@@ -165,7 +165,7 @@ function App() {
               instead; HandlePage strips the "@" itself. */}
           <Route
             path="/:handle"
-            element={<HandlePage onBack={handleGoHome} />}
+            element={<HandlePage onBack={handleGoHome} isLoggedIn={isLoggedIn} />}
           />
           <Route
             path="/dashboard"

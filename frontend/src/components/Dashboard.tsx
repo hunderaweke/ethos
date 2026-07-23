@@ -378,6 +378,8 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
           onViewProfile={onViewProfile}
           onOpenAddModal={handleOpenAddModal}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+          onShare={handleShare}
+          copied={copied}
         />
 
         {/* Workspace Body Pane */}

@@ -15,9 +15,10 @@ import { NotFoundIllustration, EmptyShelfIllustration } from "./illustrations/Il
 
 interface HandlePageProps {
   onBack: () => void;
+  isLoggedIn: boolean;
 }
 
-export default function HandlePage({ onBack }: HandlePageProps) {
+export default function HandlePage({ onBack, isLoggedIn }: HandlePageProps) {
   const { handle: rawHandle } = useParams<{ handle: string }>();
   const handle = rawHandle?.replace(/^@/, "");
   const { showToast } = useToast();
@@ -291,6 +292,7 @@ export default function HandlePage({ onBack }: HandlePageProps) {
             onShare={handleShare}
             isFollowing={isFollowing}
             onToggleFollow={toggleFollow}
+            isLoggedIn={isLoggedIn}
           />
         </div>
 
