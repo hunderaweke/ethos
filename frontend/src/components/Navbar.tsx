@@ -68,9 +68,6 @@ export default function Navbar({ onViewProfile, onViewDashboard, onViewExplore, 
               Explore
             </button>
           )}
-          <a href="#features" className="text-sm font-semibold text-zinc-600 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 rounded-sm px-1 py-0.5">
-            Features
-          </a>
         </nav>
         
         {/* Logo */}
@@ -156,14 +153,6 @@ export default function Navbar({ onViewProfile, onViewDashboard, onViewExplore, 
                   </button>
                 )}
 
-                <a
-                  href="#features"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-left px-3.5 py-3 text-sm font-bold text-zinc-600 hover:text-black hover:bg-zinc-100 rounded-sm flex items-center justify-between transition-colors"
-                >
-                  <span>Features</span>
-                  <ArrowRight className="h-4 w-4 text-zinc-400" />
-                </a>
               </div>
 
               {/* Mobile Auth Actions */}

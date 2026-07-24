@@ -86,7 +86,6 @@ export default function Footer({ onViewProfile, onViewDashboard, onViewExplore, 
                     </button>
                   </li>
                 )}
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
               </ul>
             </div>
             {/* Company Links */}
