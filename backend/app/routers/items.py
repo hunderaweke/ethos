@@ -98,7 +98,7 @@ async def list_my_items(
     q: str | None = None,
     sort: str = "custom",
     page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(10, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
