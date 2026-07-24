@@ -58,6 +58,26 @@ class Base(DeclarativeBase):
     pass
 
 
+class DatabaseUnavailableError(RuntimeError):
+    """The database couldn't be reached at all (DNS failure, connection
+    refused, timeout) — distinct from a query failing against a database
+    that IS reachable. Raised so app.errors can return a clean 503 instead
+    of letting the raw socket/asyncpg exception surface as an unhandled 500."""
+
+
+# Connection-level failures raised by asyncpg before SQLAlchemy gets a chance
+# to wrap them in its own exception hierarchy (that wrapping only happens for
+# errors during statement execution on an already-open connection).
+_CONNECTIVITY_ERRORS = (
+    ConnectionError,  # covers ConnectionRefusedError/ResetError/AbortedError
+    TimeoutError,
+    OSError,  # socket.gaierror (DNS failure) is an OSError subclass
+)
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
-        yield session
+        try:
+            yield session
+        except _CONNECTIVITY_ERRORS as exc:
+            raise DatabaseUnavailableError("Could not reach the database") from exc

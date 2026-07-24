@@ -2,14 +2,24 @@ import math
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_current_user, get_db
 from app.models import AnalyticsEvent, CurationItem, Profile, User
-from app.schemas.item import ItemCreate, ItemOut, ItemUpdate, PaginatedItems
+from app.schemas.item import ItemCreate, ItemOut, ItemUpdate, PaginatedItems, ReorderItems
 
 router = APIRouter(tags=["items"])
+
+SORT_OPTIONS = {
+    "custom": (CurationItem.sort_order.asc(),),
+    "newest": (CurationItem.created_at.desc(),),
+    "oldest": (CurationItem.created_at.asc(),),
+    "title": (CurationItem.title.asc(),),
+    "featured": (CurationItem.is_pinned.desc(), CurationItem.sort_order.asc()),
+    "most_viewed": (CurationItem.view_count.desc(),),
+    "most_saved": (CurationItem.save_count.desc(),),
+}
 
 
 async def _get_own_profile(db: AsyncSession, user: User) -> Profile:
@@ -38,7 +48,7 @@ def _apply_filters(
 
 
 async def _paginate_stmt(
-    stmt, page: int, limit: int, db: AsyncSession
+    stmt, page: int, limit: int, db: AsyncSession, order_by=(CurationItem.sort_order.asc(),)
 ) -> PaginatedItems:
     count_stmt = select(func.count()).select_from(stmt.subquery())
     total = (await db.execute(count_stmt)).scalar_one()
@@ -46,7 +56,7 @@ async def _paginate_stmt(
     pages = max(1, math.ceil(total / limit)) if total > 0 else 1
     page = min(max(1, page), pages) if total > 0 else 1
 
-    paginated_stmt = stmt.order_by(CurationItem.created_at.desc()).offset((page - 1) * limit).limit(limit)
+    paginated_stmt = stmt.order_by(*order_by).offset((page - 1) * limit).limit(limit)
     items = (await db.execute(paginated_stmt)).scalars().all()
 
     return PaginatedItems(
@@ -86,6 +96,7 @@ async def list_my_items(
     kind: str | None = None,
     tag: str | None = None,
     q: str | None = None,
+    sort: str = "custom",
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -94,7 +105,8 @@ async def list_my_items(
     profile = await _get_own_profile(db, user)
     stmt = select(CurationItem).where(CurationItem.profile_id == profile.id)
     stmt = _apply_filters(stmt, type, kind, tag, q)
-    return await _paginate_stmt(stmt, page, limit, db)
+    order_by = SORT_OPTIONS.get(sort, SORT_OPTIONS["custom"])
+    return await _paginate_stmt(stmt, page, limit, db, order_by=order_by)
 
 
 @router.post("/items", response_model=ItemOut, status_code=status.HTTP_201_CREATED)
@@ -104,6 +116,11 @@ async def create_item(
     user: User = Depends(get_current_user),
 ):
     profile = await _get_own_profile(db, user)
+    max_order = (
+        await db.execute(
+            select(func.max(CurationItem.sort_order)).where(CurationItem.profile_id == profile.id)
+        )
+    ).scalar_one()
     item = CurationItem(
         profile_id=profile.id,
         type=body.type,
@@ -117,11 +134,39 @@ async def create_item(
         tags=body.tags,
         size=body.size,
         item_metadata=body.metadata,
+        sort_order=(max_order + 1) if max_order is not None else 0,
     )
     db.add(item)
     await db.commit()
     await db.refresh(item)
     return item
+
+
+@router.patch("/items/reorder", status_code=status.HTTP_204_NO_CONTENT)
+async def reorder_items(
+    body: ReorderItems,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    profile = await _get_own_profile(db, user)
+    existing_ids = set(
+        (
+            await db.execute(
+                select(CurationItem.id).where(CurationItem.profile_id == profile.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    given_ids = body.item_ids
+    if set(given_ids) != existing_ids or len(given_ids) != len(existing_ids):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "item_ids must match all of your shelf items exactly")
+
+    for index, item_id in enumerate(given_ids):
+        await db.execute(
+            update(CurationItem).where(CurationItem.id == item_id).values(sort_order=index)
+        )
+    await db.commit()
 
 
 async def _get_own_item(db: AsyncSession, user: User, item_id: uuid.UUID) -> CurationItem:

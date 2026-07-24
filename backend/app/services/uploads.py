@@ -2,6 +2,7 @@ import hashlib
 import io
 import uuid
 from pathlib import Path
+from urllib.parse import urlparse
 
 from fastapi import HTTPException, Request, UploadFile, status
 from PIL import Image, ImageOps
@@ -94,3 +95,29 @@ async def save_image_upload(file: UploadFile, subdir: str, request: Request) -> 
     (target_dir / filename).write_bytes(output_bytes)
 
     return f"{str(request.base_url).rstrip('/')}/uploads/{subdir}/{filename}"
+
+
+def delete_old_upload(old_url: str | None) -> None:
+    """Best-effort delete of a file previously stored by save_image_upload.
+
+    Safe no-op for None/empty URLs, URLs outside our own avatars/banners
+    upload tree (e.g. the external Google-seeded picture URL), and paths
+    that would escape UPLOAD_ROOT. Never raises.
+    """
+    if not old_url:
+        return
+
+    parts = urlparse(old_url).path.removeprefix("/uploads/").split("/")
+    if len(parts) != 2 or parts[0] not in MAX_DIMENSIONS or not parts[1] or ".." in parts:
+        return
+
+    candidate = (UPLOAD_ROOT / parts[0] / parts[1]).resolve()
+    try:
+        candidate.relative_to(UPLOAD_ROOT.resolve())
+    except ValueError:
+        return
+
+    try:
+        candidate.unlink()
+    except OSError:
+        pass

@@ -61,6 +61,7 @@ class ItemOut(BaseModel):
     view_count: int
     save_count: int
     click_count: int
+    sort_order: int
     created_at: datetime
     updated_at: datetime
 
@@ -72,3 +73,7 @@ class PaginatedItems(BaseModel):
     limit: int
     pages: int
     has_more: bool
+
+
+class ReorderItems(BaseModel):
+    item_ids: list[uuid.UUID]

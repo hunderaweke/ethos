@@ -9,7 +9,7 @@ from app.config import settings
 from app.deps import get_current_user, get_db, get_optional_user
 from app.models import AnalyticsEvent, Follow, Profile, User
 from app.schemas.profile import HandleAvailability, ProfileCreate, ProfileOut, ProfileUpdate
-from app.services.uploads import save_image_upload
+from app.services.uploads import delete_old_upload, save_image_upload
 
 router = APIRouter(tags=["profiles"])
 
@@ -138,9 +138,11 @@ async def upload_my_avatar(
     if profile is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No profile yet")
 
+    old_avatar_url = profile.avatar_url
     profile.avatar_url = await save_image_upload(file, "avatars", request)
     await db.commit()
     await db.refresh(profile)
+    delete_old_upload(old_avatar_url)
     return profile
 
 
@@ -156,9 +158,11 @@ async def upload_my_banner(
     if profile is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No profile yet")
 
+    old_banner_url = profile.banner_url
     profile.banner_url = await save_image_upload(file, "banners", request)
     await db.commit()
     await db.refresh(profile)
+    delete_old_upload(old_banner_url)
     return profile
 
 

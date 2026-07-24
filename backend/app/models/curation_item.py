@@ -38,3 +38,4 @@ class CurationItem(UUIDPkMixin, TimestampMixin, Base):
     view_count: Mapped[int] = mapped_column(default=0)
     save_count: Mapped[int] = mapped_column(default=0)
     click_count: Mapped[int] = mapped_column(default=0)
+    sort_order: Mapped[int] = mapped_column(default=0)
