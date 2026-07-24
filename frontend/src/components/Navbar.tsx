@@ -4,12 +4,13 @@ import { List, X, ArrowRight, SignOut } from "@phosphor-icons/react";
 interface NavbarProps {
   onViewProfile: () => void;
   onViewDashboard?: () => void;
+  onViewExplore?: () => void;
   onOpenAuth?: (mode: "login" | "signup") => void;
   isLoggedIn?: boolean;
   onLogout?: () => void;
 }
 
-export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth, isLoggedIn, onLogout }: NavbarProps) {
+export default function Navbar({ onViewProfile, onViewDashboard, onViewExplore, onOpenAuth, isLoggedIn, onLogout }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -51,12 +52,6 @@ export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth, isL
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-6 lg:gap-8">
-          <button 
-            onClick={onViewProfile} 
-            className="inline-flex items-center text-sm font-semibold text-zinc-600 hover:text-black transition-colors cursor-pointer bg-transparent border-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 rounded-sm px-1 py-0.5"
-          >
-            Mind-Shelf
-          </button>
           {isLoggedIn && onViewDashboard && (
             <button
               onClick={onViewDashboard}
@@ -65,9 +60,14 @@ export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth, isL
               Dashboard
             </button>
           )}
-          <a href="#discovery" className="text-sm font-semibold text-zinc-600 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 rounded-sm px-1 py-0.5">
-            Explore
-          </a>
+          {onViewExplore && (
+            <button
+              onClick={onViewExplore}
+              className="text-sm font-semibold text-zinc-600 hover:text-black transition-colors cursor-pointer bg-transparent border-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 rounded-sm px-1 py-0.5"
+            >
+              Explore
+            </button>
+          )}
           <a href="#features" className="text-sm font-semibold text-zinc-600 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 rounded-sm px-1 py-0.5">
             Features
           </a>
@@ -130,17 +130,6 @@ export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth, isL
             />
             <div className="absolute top-full left-0 right-0 mt-3 p-4 bg-white/95 backdrop-blur-xl border border-zinc-200/90 rounded-sm shadow-xl z-50 animate-in fade-in slide-in-from-top-2 md:hidden space-y-3">
               <div className="flex flex-col space-y-1">
-                <button
-                  onClick={() => {
-                    onViewProfile();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3.5 py-3 text-sm font-bold text-zinc-800 hover:text-black hover:bg-zinc-100 rounded-sm flex items-center justify-between transition-colors cursor-pointer"
-                >
-                  <span>Mind-Shelf</span>
-                  <ArrowRight className="h-4 w-4 text-zinc-400" />
-                </button>
-
                 {isLoggedIn && onViewDashboard && (
                   <button
                     onClick={() => {
@@ -154,14 +143,18 @@ export default function Navbar({ onViewProfile, onViewDashboard, onOpenAuth, isL
                   </button>
                 )}
 
-                <a
-                  href="#discovery"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-left px-3.5 py-3 text-sm font-bold text-zinc-600 hover:text-black hover:bg-zinc-100 rounded-sm flex items-center justify-between transition-colors"
-                >
-                  <span>Explore</span>
-                  <ArrowRight className="h-4 w-4 text-zinc-400" />
-                </a>
+                {onViewExplore && (
+                  <button
+                    onClick={() => {
+                      onViewExplore();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3.5 py-3 text-sm font-bold text-zinc-600 hover:text-black hover:bg-zinc-100 rounded-sm flex items-center justify-between transition-colors cursor-pointer"
+                  >
+                    <span>Explore</span>
+                    <ArrowRight className="h-4 w-4 text-zinc-400" />
+                  </button>
+                )}
 
                 <a
                   href="#features"

@@ -4,6 +4,7 @@ import {
   Plus,
   Funnel,
   CaretDown,
+  CaretUp,
   Check,
   Tag,
   X,
@@ -60,6 +61,9 @@ interface ManageShelfTabProps {
   setIsKindOpen: (open: boolean) => void;
   isTagOpen: boolean;
   setIsTagOpen: (open: boolean) => void;
+  sortMode: string;
+  setSortMode: (sort: string) => void;
+  onMoveItem: (id: string, direction: "up" | "down") => void;
   page: number;
   pages: number;
   total: number;
@@ -95,6 +99,9 @@ export default function ManageShelfTab({
   setIsKindOpen,
   isTagOpen,
   setIsTagOpen,
+  sortMode,
+  setSortMode,
+  onMoveItem,
   page,
   pages,
   total,
@@ -387,34 +394,56 @@ export default function ManageShelfTab({
 
         </div>
 
-        {/* Search Bar Input */}
-        <div className="relative shrink-0 md:w-56 mt-2 md:mt-0">
-          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-          <input
-            type="text"
-            placeholder="Search shelf items..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm pl-9 pr-3 py-2 text-xs text-zinc-900 font-semibold placeholder-zinc-400 outline-none transition-colors"
-          />
+        {/* Sort & Search */}
+        <div className="flex items-center gap-2 mt-2 md:mt-0">
+          <select
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value)}
+            className="bg-zinc-50 border border-zinc-200 rounded-sm px-3 py-2 text-xs font-bold text-zinc-900 outline-none cursor-pointer hover:border-zinc-400 transition-colors"
+          >
+            <option value="custom">Custom Order</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="title">Title A-Z</option>
+            <option value="featured">Featured First</option>
+            <option value="most_viewed">Most Viewed</option>
+            <option value="most_saved">Most Saved</option>
+          </select>
+
+          <div className="relative shrink-0 md:w-56">
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Search shelf items..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-sm pl-9 pr-3 py-2 text-xs text-zinc-900 font-semibold placeholder-zinc-400 outline-none transition-colors"
+            />
+          </div>
         </div>
 
       </div>
 
-      {/* Server-Side Pagination (Top) */}
-      <Pagination
-        page={page}
-        pages={pages}
-        total={total}
-        limit={limit}
-        onPageChange={onPageChange}
-        onLimitChange={onLimitChange}
-      />
+      {sortMode === "custom" ? (
+        <p className="text-[10px] font-bold text-zinc-400 tracking-wide uppercase">
+          Use the arrows below to arrange your shelf — it's also the order visitors see.
+        </p>
+      ) : (
+        /* Server-Side Pagination (Top) */
+        <Pagination
+          page={page}
+          pages={pages}
+          total={total}
+          limit={limit}
+          onPageChange={onPageChange}
+          onLimitChange={onLimitChange}
+        />
+      )}
 
       {/* Items List */}
       <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-sm overflow-hidden shadow-2xs">
         {filteredItems.length > 0 ? (
-          filteredItems.map(item => {
+          filteredItems.map((item, index) => {
             const isPinned = !!pinnedItemIds[item.id];
             
             const iconColor = getSocialMediaColor(item.type, 1);
@@ -495,6 +524,27 @@ export default function ManageShelfTab({
 
                 {/* Item Actions */}
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  {sortMode === "custom" && (
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        onClick={() => onMoveItem(item.id, "up")}
+                        disabled={index === 0}
+                        className="p-1 rounded-sm bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-100 disabled:opacity-30 disabled:hover:bg-white transition-colors cursor-pointer disabled:cursor-not-allowed min-w-[28px] min-h-[18px] flex items-center justify-center"
+                        title="Move up"
+                      >
+                        <CaretUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => onMoveItem(item.id, "down")}
+                        disabled={index === filteredItems.length - 1}
+                        className="p-1 rounded-sm bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-100 disabled:opacity-30 disabled:hover:bg-white transition-colors cursor-pointer disabled:cursor-not-allowed min-w-[28px] min-h-[18px] flex items-center justify-center"
+                        title="Move down"
+                      >
+                        <CaretDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   <button
                     onClick={() => onTogglePin(item.id)}
                     className={`p-2 rounded-sm border transition-colors cursor-pointer text-xs font-bold flex items-center justify-center min-w-[36px] min-h-[36px] ${

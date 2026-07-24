@@ -9,6 +9,7 @@ import {
   updateItem,
   deleteItem,
   toggleItemPin,
+  reorderItems,
   updateMyProfile,
   createProfile,
   uploadAvatar,
@@ -67,6 +68,7 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
   const [filterKind, setFilterKind] = useState<string>("all");
   const [activeTag, setActiveTag] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortMode, setSortMode] = useState<string>("custom");
 
   // Pagination state
   const [page, setPage] = useState<number>(1);
@@ -145,7 +147,9 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
     };
   }, [refreshSummary, onLogout]);
 
-  // Fetch paginated items for my shelf
+  // Fetch items for my shelf. In "custom" sort mode, manual reordering needs
+  // the full unpaginated list to be meaningful, so pagination is bypassed.
+  const isCustomSort = sortMode === "custom";
   const fetchMyItems = useCallback(() => {
     setLoading(true);
     getMyItems({
@@ -153,21 +157,22 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
       kind: filterKind,
       tag: activeTag,
       q: searchQuery,
-      page,
-      limit,
+      sort: sortMode,
+      page: isCustomSort ? 1 : page,
+      limit: isCustomSort ? 200 : limit,
     })
       .then((res) => {
         setItems(res.items.map(toCurationItem));
         setTotal(res.total);
-        setPages(res.pages);
-        setPage(res.page);
+        setPages(isCustomSort ? 1 : res.pages);
+        setPage(isCustomSort ? 1 : res.page);
         setPinnedItemIds(
           Object.fromEntries(res.items.filter(i => i.is_pinned).map(i => [i.id, true]))
         );
       })
       .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
-  }, [filterCategory, filterKind, activeTag, searchQuery, page, limit]);
+  }, [filterCategory, filterKind, activeTag, searchQuery, sortMode, isCustomSort, page, limit]);
 
   useEffect(() => {
     if (profileReady) {
@@ -201,6 +206,24 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
       })
       .catch(() => triggerError("Couldn't update pin — try again."));
   }, [items]);
+
+  const moveItem = useCallback((id: string, direction: "up" | "down") => {
+    setItems(prev => {
+      const index = prev.findIndex(i => i.id === id);
+      const swapWith = direction === "up" ? index - 1 : index + 1;
+      if (index === -1 || swapWith < 0 || swapWith >= prev.length) return prev;
+
+      const reordered = [...prev];
+      [reordered[index], reordered[swapWith]] = [reordered[swapWith], reordered[index]];
+
+      reorderItems(reordered.map(i => i.id)).catch(() => {
+        triggerError("Couldn't save the new order — try again.");
+        fetchMyItems();
+      });
+
+      return reordered;
+    });
+  }, [fetchMyItems]);
 
   const confirmDelete = () => {
     if (!itemToDelete) return;
@@ -416,6 +439,9 @@ export default function Dashboard({ onViewProfile, onGoHome, onLogout }: Dashboa
               setIsKindOpen={setIsKindOpen}
               isTagOpen={isTagOpen}
               setIsTagOpen={setIsTagOpen}
+              sortMode={sortMode}
+              setSortMode={(s) => { setSortMode(s); setPage(1); }}
+              onMoveItem={moveItem}
               page={page}
               pages={pages}
               total={total}

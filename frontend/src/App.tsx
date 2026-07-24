@@ -7,6 +7,7 @@ import AboutSection from "./components/AboutSection";
 import ShareSection from "./components/ShareSection";
 import Footer from "./components/Footer";
 import HandlePage from "./components/HandlePage";
+import ExplorePage from "./components/ExplorePage";
 import Dashboard from "./components/Dashboard";
 import AuthModal from "./components/AuthModal";
 import { getMe, logout as apiLogout } from "./utils/api";
@@ -18,6 +19,7 @@ const DEMO_HANDLE = "technomad23";
 function Landing({
   onViewProfile,
   onViewDashboard,
+  onViewExplore,
   onOpenAuth,
   onGoHome,
   isLoggedIn,
@@ -25,6 +27,7 @@ function Landing({
 }: {
   onViewProfile: () => void;
   onViewDashboard: () => void;
+  onViewExplore: () => void;
   onOpenAuth: (mode?: "login" | "signup", claimHandle?: string) => void;
   onGoHome: () => void;
   isLoggedIn: boolean;
@@ -35,6 +38,7 @@ function Landing({
       <Navbar
         onViewProfile={onViewProfile}
         onViewDashboard={onViewDashboard}
+        onViewExplore={onViewExplore}
         onOpenAuth={onOpenAuth}
         isLoggedIn={isLoggedIn}
         onLogout={onLogout}
@@ -51,6 +55,7 @@ function Landing({
       <Footer
         onViewProfile={onViewProfile}
         onViewDashboard={onViewDashboard}
+        onViewExplore={onViewExplore}
         onGoHome={onGoHome}
         onOpenAuth={onOpenAuth}
       />
@@ -116,6 +121,11 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleShowExplore = () => {
+    navigate("/explore");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleGoHome = () => {
     navigate("/");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -153,6 +163,20 @@ function App() {
               <Landing
                 onViewProfile={handleShowProfile}
                 onViewDashboard={handleShowDashboard}
+                onViewExplore={handleShowExplore}
+                onOpenAuth={handleOpenAuth}
+                onGoHome={handleGoHome}
+                isLoggedIn={isLoggedIn}
+                onLogout={handleLogout}
+              />
+            }
+          />
+          <Route
+            path="/explore"
+            element={
+              <ExplorePage
+                onViewProfile={handleShowProfile}
+                onViewDashboard={handleShowDashboard}
                 onOpenAuth={handleOpenAuth}
                 onGoHome={handleGoHome}
                 isLoggedIn={isLoggedIn}
@@ -165,7 +189,13 @@ function App() {
               instead; HandlePage strips the "@" itself. */}
           <Route
             path="/:handle"
-            element={<HandlePage onBack={handleGoHome} isLoggedIn={isLoggedIn} />}
+            element={
+              <HandlePage
+                onBack={handleGoHome}
+                isLoggedIn={isLoggedIn}
+                onGoDashboard={handleShowDashboard}
+              />
+            }
           />
           <Route
             path="/dashboard"

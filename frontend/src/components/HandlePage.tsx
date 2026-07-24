@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, Funnel, MagnifyingGlass, CaretDown, Tag, X, Check, ShareNetwork } from "@phosphor-icons/react";
+import { ArrowLeft, BookOpen, Funnel, MagnifyingGlass, CaretDown, Tag, X, Check, ShareNetwork, SquaresFour } from "@phosphor-icons/react";
 import ProfileHeader from "./ProfileHeader";
 import CurationCard from "./CurationCard";
 import Footer from "./Footer";
@@ -16,9 +16,10 @@ import { NotFoundIllustration, EmptyShelfIllustration } from "./illustrations/Il
 interface HandlePageProps {
   onBack: () => void;
   isLoggedIn: boolean;
+  onGoDashboard?: () => void;
 }
 
-export default function HandlePage({ onBack, isLoggedIn }: HandlePageProps) {
+export default function HandlePage({ onBack, isLoggedIn, onGoDashboard }: HandlePageProps) {
   const { handle: rawHandle } = useParams<{ handle: string }>();
   const handle = rawHandle?.replace(/^@/, "");
   const { showToast } = useToast();
@@ -251,6 +252,17 @@ export default function HandlePage({ onBack, isLoggedIn }: HandlePageProps) {
               <span className="hidden sm:inline font-sans">Back to Home</span>
               <span className="sm:hidden font-sans">Back</span>
             </button>
+
+            {isLoggedIn && onGoDashboard && (
+              <button
+                onClick={onGoDashboard}
+                className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-black transition-colors cursor-pointer bg-zinc-100/90 hover:bg-zinc-200/80 px-3.5 py-2 rounded-sm border border-zinc-200/60 group"
+              >
+                <SquaresFour className="h-3.5 w-3.5 text-zinc-900" />
+                <span className="hidden sm:inline font-sans">Back to Dashboard</span>
+                <span className="sm:hidden font-sans">Dashboard</span>
+              </button>
+            )}
 
             <div className="hidden lg:flex items-center gap-4 text-xs font-semibold text-slate-500">
               <span className="text-zinc-300">•</span>

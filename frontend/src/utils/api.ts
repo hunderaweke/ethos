@@ -57,6 +57,7 @@ export interface ApiItem {
   view_count: number;
   save_count: number;
   click_count: number;
+  sort_order: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -162,17 +163,25 @@ export function logout(): Promise<void> {
 }
 
 export function getMyItems(
-  filters: { type?: string; kind?: string; tag?: string; q?: string; page?: number; limit?: number } = {}
+  filters: { type?: string; kind?: string; tag?: string; q?: string; sort?: string; page?: number; limit?: number } = {}
 ): Promise<PaginatedResponse<ApiItem>> {
   const params = new URLSearchParams();
   if (filters.type && filters.type !== "all") params.set("type", filters.type);
   if (filters.kind && filters.kind !== "all") params.set("kind", filters.kind);
   if (filters.tag && filters.tag !== "all") params.set("tag", filters.tag);
   if (filters.q) params.set("q", filters.q);
+  if (filters.sort) params.set("sort", filters.sort);
   if (filters.page) params.set("page", String(filters.page));
   if (filters.limit) params.set("limit", String(filters.limit));
   const qs = params.toString();
   return apiFetch(`/items/me${qs ? `?${qs}` : ""}`);
+}
+
+export function reorderItems(itemIds: string[]): Promise<void> {
+  return apiFetch(`/items/reorder`, {
+    method: "PATCH",
+    body: JSON.stringify({ item_ids: itemIds }),
+  });
 }
 
 export interface ItemInput {
@@ -271,6 +280,51 @@ export function getCategoryBreakdown(): Promise<CategoryBreakdown[]> {
 
 export function getLeaderboard(limit = 10): Promise<LeaderboardItem[]> {
   return apiFetch(`/analytics/me/leaderboard?limit=${limit}`);
+}
+
+export interface DiscoverProfile {
+  id: string;
+  handle: string;
+  display_name: string;
+  bio: string;
+  location: string;
+  skills: string;
+  avatar_url: string | null;
+  banner_url: string | null;
+  is_verified: boolean;
+  follower_count: number;
+  view_count: number;
+  curator_score: number | null;
+  is_following: boolean;
+}
+
+export interface DiscoverItem extends ApiItem {
+  profile_handle: string;
+  profile_display_name: string;
+  profile_avatar_url: string | null;
+}
+
+export function discoverProfiles(
+  filters: { q?: string; page?: number; limit?: number } = {}
+): Promise<PaginatedResponse<DiscoverProfile>> {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.page) params.set("page", String(filters.page));
+  if (filters.limit) params.set("limit", String(filters.limit));
+  const qs = params.toString();
+  return apiFetch(`/discover/profiles${qs ? `?${qs}` : ""}`);
+}
+
+export function discoverItems(
+  filters: { type?: string; tag?: string; page?: number; limit?: number } = {}
+): Promise<PaginatedResponse<DiscoverItem>> {
+  const params = new URLSearchParams();
+  if (filters.type && filters.type !== "all") params.set("type", filters.type);
+  if (filters.tag && filters.tag !== "all") params.set("tag", filters.tag);
+  if (filters.page) params.set("page", String(filters.page));
+  if (filters.limit) params.set("limit", String(filters.limit));
+  const qs = params.toString();
+  return apiFetch(`/discover/items${qs ? `?${qs}` : ""}`);
 }
 
 export function toCurationItem(item: ApiItem): import("../types").CurationItem {
